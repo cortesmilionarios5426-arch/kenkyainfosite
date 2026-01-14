@@ -1,11 +1,14 @@
-import { FormData, FormStep, PlanType } from '@/types/form';
+import { FormData, FormStep } from '@/types/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { PlanSelector } from './PlanSelector';
 import { SocialNetworkInput } from './SocialNetworkInput';
-import { Upload, Palette } from 'lucide-react';
+import { Upload, Palette, Image, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useRef, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface FormStepContentProps {
   step: FormStep;
@@ -77,6 +80,80 @@ const fieldDescriptions: Record<string, string> = {
 };
 
 export function FormStepContent({ step, formData, updateField }: FormStepContentProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(formData.logoUrl);
+  const { toast } = useToast();
+
+  const handleLogoUpload = async (file: File) => {
+    if (!file) return;
+
+    // Validate file size (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: 'Arquivo muito grande',
+        description: 'O tamanho máximo permitido é 2MB.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Formato inválido',
+        description: 'Por favor, envie uma imagem (PNG, JPG ou SVG).',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Create unique file name
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('logos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('logos')
+        .getPublicUrl(data.path);
+
+      updateField('logoUrl', publicUrl);
+      setPreviewUrl(publicUrl);
+
+      toast({
+        title: 'Logo enviada!',
+        description: 'Sua logo foi carregada com sucesso.',
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: 'Erro no upload',
+        description: 'Não foi possível enviar a imagem. Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeLogo = () => {
+    updateField('logoUrl', null);
+    setPreviewUrl(null);
+  };
+
   const renderField = (field: keyof FormData, index: number) => {
     const label = fieldLabels[field];
     const placeholder = fieldPlaceholders[field];
@@ -110,37 +187,65 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
     // Special case: Logo upload
     if (field === 'logoUrl') {
       return (
-        <div key={field} className="space-y-2 animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+        <div key={field} className="space-y-3 animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
           <Label className="text-base font-medium">{label}</Label>
-          <div
-            className={cn(
-              'border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300',
-              'hover:border-primary/50 hover:bg-primary/5 cursor-pointer',
-              'border-border'
-            )}
-          >
-            <Upload className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mb-1">
-              Arraste sua logo aqui ou clique para selecionar
-            </p>
-            <p className="text-xs text-muted-foreground">PNG, JPG ou SVG (máx. 2MB)</p>
-            <Input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  // For now, we'll just store the file name
-                  // Later we can implement actual upload
-                  updateField('logoUrl', file.name);
-                }
-              }}
-            />
-          </div>
-          {formData.logoUrl && (
-            <p className="text-sm text-primary">✓ {formData.logoUrl}</p>
+          
+          {previewUrl ? (
+            <div className="relative inline-block">
+              <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-border bg-card">
+                <img
+                  src={previewUrl}
+                  alt="Logo preview"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={removeLogo}
+                className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className={cn(
+                'border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer',
+                'hover:border-primary/50 hover:bg-primary/5',
+                'border-border bg-card/30',
+                isUploading && 'opacity-50 pointer-events-none'
+              )}
+            >
+              {isUploading ? (
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin mb-3" />
+                  <p className="text-sm text-muted-foreground">Enviando...</p>
+                </div>
+              ) : (
+                <>
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Image className="w-8 h-8 text-primary" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground mb-1">
+                    Clique para enviar sua logo
+                  </p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG ou SVG • Máx. 2MB</p>
+                </>
+              )}
+            </div>
           )}
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleLogoUpload(file);
+            }}
+          />
         </div>
       );
     }
@@ -148,7 +253,7 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
     // Special case: Colors
     if (field === 'businessColors') {
       return (
-        <div key={field} className="space-y-2 animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+        <div key={field} className="space-y-3 animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
           <Label htmlFor={field} className="text-base font-medium flex items-center gap-2">
             <Palette className="w-4 h-4 text-primary" />
             {label}
@@ -163,18 +268,32 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
             placeholder={placeholder}
             className="form-input-animated"
           />
-          <div className="flex gap-2 flex-wrap mt-2">
-            {['#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FF9800', '#795548', '#000000', '#FFFFFF'].map((color) => (
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { hex: '#E91E63', name: 'Rosa' },
+              { hex: '#9C27B0', name: 'Roxo' },
+              { hex: '#2196F3', name: 'Azul' },
+              { hex: '#4CAF50', name: 'Verde' },
+              { hex: '#FF9800', name: 'Laranja' },
+              { hex: '#795548', name: 'Marrom' },
+              { hex: '#000000', name: 'Preto' },
+              { hex: '#FFFFFF', name: 'Branco' },
+            ].map((color) => (
               <button
-                key={color}
+                key={color.hex}
                 type="button"
-                className="w-8 h-8 rounded-full border-2 border-border hover:scale-110 transition-transform"
-                style={{ backgroundColor: color }}
+                title={color.name}
+                className={cn(
+                  'w-9 h-9 rounded-lg border-2 hover:scale-110 transition-all duration-200 shadow-sm',
+                  formData.businessColors.includes(color.name)
+                    ? 'border-primary ring-2 ring-primary/30'
+                    : 'border-border/50'
+                )}
+                style={{ backgroundColor: color.hex }}
                 onClick={() => {
                   const currentColors = formData.businessColors;
-                  const colorName = color;
-                  if (!currentColors.includes(colorName)) {
-                    updateField('businessColors', currentColors ? `${currentColors}, ${colorName}` : colorName);
+                  if (!currentColors.includes(color.name)) {
+                    updateField('businessColors', currentColors ? `${currentColors}, ${color.name}` : color.name);
                   }
                 }}
               />
