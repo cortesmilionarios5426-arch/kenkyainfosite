@@ -4,9 +4,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { PlanSelector } from './PlanSelector';
 import { SocialNetworkInput } from './SocialNetworkInput';
-import { Upload, Palette, Image, X } from 'lucide-react';
+import { TestimonialInput, Testimonial } from './TestimonialInput';
+import { Image, X, Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -30,8 +31,8 @@ const fieldLabels: Record<keyof FormData, string> = {
   mainObjective: 'Objetivo principal da página',
   painSolutions: 'Dores & Soluções',
   competitiveDifferentials: 'Diferenciais competitivos',
-  testimonialsSection: 'Depoimentos',
-  visualProcess: 'Processo de atendimento visual',
+  testimonialsSection: 'Depoimentos de clientes',
+  visualProcess: 'Processo de atendimento',
   faq: 'FAQ - Perguntas frequentes',
   resultsGallery: 'Galeria de resultados',
   premiumVisualStyle: 'Estilo visual premium',
@@ -39,25 +40,65 @@ const fieldLabels: Record<keyof FormData, string> = {
 };
 
 const fieldPlaceholders: Record<keyof FormData, string> = {
-  businessName: 'Ex: Studio Ana Makeup',
-  mainService: 'Ex: Maquiagem profissional para noivas',
-  businessColors: 'Ex: Rosa, dourado e branco',
+  businessName: 'Ex: Studio Ana Makeup, Clínica Dr. João Silva, Barbearia Vintage',
+  mainService: 'Ex: Maquiagem profissional para noivas e festas, Tratamento de acne, Corte masculino moderno',
+  businessColors: 'Ex: Rosa claro, dourado e branco',
   whatsappNumber: 'Ex: (11) 99999-9999',
   socialNetworks: '',
   logoUrl: '',
   chosenPlan: '',
-  professionalSummary: 'Conte um pouco sobre você e sua experiência...',
-  services: 'Liste seus principais serviços separados por vírgula...',
-  locationHours: 'Ex: Av. Paulista, 1000 - Segunda a Sexta, 9h às 18h',
-  mainObjective: 'O que você quer que os visitantes façam? Ex: Agendar consulta',
-  painSolutions: 'Quais problemas você resolve? E como?',
-  competitiveDifferentials: 'O que te diferencia da concorrência?',
-  testimonialsSection: 'Copie e cole depoimentos de clientes satisfeitos...',
-  visualProcess: 'Descreva as etapas do seu atendimento...',
-  faq: 'Liste as perguntas mais frequentes e suas respostas...',
-  resultsGallery: 'Descreva as imagens/provas que gostaria de incluir...',
-  premiumVisualStyle: 'Descreva o estilo visual desejado...',
-  advancedFooterMap: 'Endereço completo para o mapa...',
+  professionalSummary: `Ex: Sou maquiadora profissional há 8 anos, especializada em noivas e formandas. Já atendi mais de 500 clientes e minha missão é realçar a beleza natural de cada mulher com técnicas atuais e produtos de alta qualidade.`,
+  services: `Ex:
+• Maquiagem para Noivas - R$ 350
+• Maquiagem Social (festas/eventos) - R$ 180  
+• Curso de Automaquiagem - R$ 250
+• Pacote Noiva + Madrinhas (desconto especial)`,
+  locationHours: `Ex: Atendo em estúdio próprio na Av. Paulista, 1000 - Sala 302
+Seg a Sex: 9h às 19h | Sáb: 8h às 16h
+Atendimento a domicílio sob consulta`,
+  mainObjective: 'Ex: Quero que os visitantes agendem uma avaliação gratuita pelo WhatsApp',
+  painSolutions: `Ex:
+PROBLEMA: Cliente não sabe qual maquiagem combina com seu rosto
+SOLUÇÃO: Ofereço consultoria de coloração pessoal incluída no serviço
+
+PROBLEMA: Medo de parecer "muito maquiada" 
+SOLUÇÃO: Técnica de maquiagem natural que realça sem exageros`,
+  competitiveDifferentials: `Ex:
+• 8 anos de experiência com noivas
+• Produtos importados de alta durabilidade
+• Prova de maquiagem incluída no pacote noiva
+• Atendimento personalizado (máx. 2 noivas por dia)
+• 100% de avaliações 5 estrelas no Google`,
+  testimonialsSection: '',
+  visualProcess: `Ex:
+1º CONTATO: Conversamos pelo WhatsApp para entender o evento
+2º PROVA: Agendamos uma prova de maquiagem 15 dias antes
+3º GRANDE DIA: Chego 2h antes para garantir um resultado perfeito
+4º PÓS: Envio kit retoque e dicas para a maquiagem durar toda a festa`,
+  faq: `Ex:
+P: A maquiagem dura o dia todo?
+R: Sim! Uso primers e fixadores profissionais que garantem duração de 12h+
+
+P: Vocês atendem a domicílio?
+R: Sim, com taxa de deslocamento a partir de R$ 50 dependendo da região
+
+P: Posso fazer prova antes do evento?
+R: Para noivas, a prova está incluída. Para outros eventos, consulte disponibilidade`,
+  resultsGallery: `Ex:
+• 10 fotos de antes/depois de noivas
+• Vídeos curtos de transformações
+• Prints de avaliações do Google/Instagram
+• Certificados de cursos que fiz
+• Fotos minhas trabalhando (bastidores)`,
+  premiumVisualStyle: `Ex:
+Quero um visual elegante e romântico, com tons de rosa e dourado.
+Fontes delicadas e femininas.
+Fotos com filtro suave, estilo Pinterest.
+Referência: @maquiadoresucesso no Instagram`,
+  advancedFooterMap: `Ex: Rua das Flores, 123 - Sala 45
+Bairro Jardim América, São Paulo - SP
+CEP: 01234-567
+(Próximo ao Metrô Consolação)`,
 };
 
 const fieldDescriptions: Record<string, string> = {
@@ -66,17 +107,17 @@ const fieldDescriptions: Record<string, string> = {
   businessColors: 'Usaremos para personalizar o design da sua página',
   whatsappNumber: 'Incluiremos botões de WhatsApp na página',
   professionalSummary: 'Uma breve apresentação sobre você e seu trabalho',
-  services: 'Detalhe os serviços que você oferece',
+  services: 'Liste seus serviços com preços (se quiser divulgar)',
   locationHours: 'Onde e quando você atende',
   mainObjective: 'A ação principal que visitantes devem realizar',
   painSolutions: 'Conecte os problemas dos clientes às suas soluções',
   competitiveDifferentials: 'Por que escolher você e não a concorrência?',
-  testimonialsSection: 'Provas sociais que geram confiança',
-  visualProcess: 'Mostre como é trabalhar com você, passo a passo',
-  faq: 'Responda dúvidas antes que elas surjam',
-  resultsGallery: 'Imagens de antes/depois, certificados, prêmios',
-  premiumVisualStyle: 'Preferências de design, referências visuais',
-  advancedFooterMap: 'Facilitará que clientes te encontrem',
+  testimonialsSection: 'Adicione depoimentos reais de clientes satisfeitos',
+  visualProcess: 'Descreva passo a passo como funciona seu atendimento',
+  faq: 'Responda as perguntas que você mais recebe',
+  resultsGallery: 'Descreva as imagens/provas que gostaria de incluir',
+  premiumVisualStyle: 'Descreva o estilo visual desejado e referências',
+  advancedFooterMap: 'Endereço completo para mostrar no mapa',
 };
 
 export function FormStepContent({ step, formData, updateField }: FormStepContentProps) {
@@ -85,10 +126,29 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
   const [previewUrl, setPreviewUrl] = useState<string | null>(formData.logoUrl);
   const { toast } = useToast();
 
+  // Parse testimonials from string or use as array
+  const parseTestimonials = (): Testimonial[] => {
+    const section = formData.testimonialsSection;
+    if (!section) return [];
+    try {
+      const parsed = JSON.parse(section);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // Not JSON, return empty
+    }
+    return [];
+  };
+
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(parseTestimonials);
+
+  useEffect(() => {
+    // Sync testimonials to form field as JSON
+    updateField('testimonialsSection', JSON.stringify(testimonials));
+  }, [testimonials]);
+
   const handleLogoUpload = async (file: File) => {
     if (!file) return;
 
-    // Validate file size (2MB)
     if (file.size > 2 * 1024 * 1024) {
       toast({
         title: 'Arquivo muito grande',
@@ -98,7 +158,6 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
       return;
     }
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast({
         title: 'Formato inválido',
@@ -111,11 +170,9 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
     setIsUploading(true);
 
     try {
-      // Create unique file name
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-      // Upload to Supabase Storage
       const { data, error } = await supabase.storage
         .from('logos')
         .upload(fileName, file, {
@@ -125,7 +182,6 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
 
       if (error) throw error;
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('logos')
         .getPublicUrl(data.path);
@@ -179,6 +235,23 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
           <SocialNetworkInput
             networks={formData.socialNetworks}
             onChange={(networks) => updateField('socialNetworks', networks)}
+          />
+        </div>
+      );
+    }
+
+    // Special case: Testimonials
+    if (field === 'testimonialsSection') {
+      return (
+        <div key={field} className="space-y-2 animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <Label className="text-base font-medium">{label}</Label>
+          {description && (
+            <p className="text-sm text-muted-foreground">{description}</p>
+          )}
+          <TestimonialInput
+            testimonials={testimonials}
+            onChange={setTestimonials}
+            maxTestimonials={4}
           />
         </div>
       );
@@ -310,7 +383,6 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
       'mainObjective',
       'painSolutions',
       'competitiveDifferentials',
-      'testimonialsSection',
       'visualProcess',
       'faq',
       'resultsGallery',
@@ -329,8 +401,8 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
             value={formData[field] as string}
             onChange={(e) => updateField(field, e.target.value as FormData[typeof field])}
             placeholder={placeholder}
-            className="form-input-animated min-h-[120px] resize-none"
-            rows={4}
+            className="form-input-animated min-h-[140px] resize-none"
+            rows={5}
           />
         </div>
       );

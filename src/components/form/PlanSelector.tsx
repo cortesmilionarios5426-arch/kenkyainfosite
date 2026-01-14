@@ -1,17 +1,11 @@
 import { PlanType, planInfo } from '@/types/form';
 import { cn } from '@/lib/utils';
-import { Check, Star, Zap, Crown } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 interface PlanSelectorProps {
   selectedPlan: PlanType;
   onSelectPlan: (plan: PlanType) => void;
 }
-
-const planIcons = {
-  presenca: Star,
-  conversao: Zap,
-  autoridade: Crown,
-};
 
 export function PlanSelector({ selectedPlan, onSelectPlan }: PlanSelectorProps) {
   const plans: PlanType[] = ['presenca', 'conversao', 'autoridade'];
@@ -25,10 +19,9 @@ export function PlanSelector({ selectedPlan, onSelectPlan }: PlanSelectorProps) 
       </div>
       
       <div className="grid gap-4 md:grid-cols-3">
-        {plans.map((plan) => {
+        {plans.map((plan, index) => {
           const info = planInfo[plan];
           const isSelected = selectedPlan === plan;
-          const Icon = planIcons[plan];
 
           return (
             <button
@@ -60,16 +53,16 @@ export function PlanSelector({ selectedPlan, onSelectPlan }: PlanSelectorProps) 
                 </div>
               )}
 
-              {/* Icon */}
+              {/* Plan number badge */}
               <div
                 className={cn(
-                  'w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-all duration-300',
-                  'bg-gradient-to-br',
-                  info.color,
-                  isSelected ? 'shadow-lg' : 'opacity-80 group-hover:opacity-100'
+                  'w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg font-bold transition-all duration-300',
+                  isSelected
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary'
                 )}
               >
-                <Icon className="w-7 h-7 text-white" />
+                {index + 1}
               </div>
 
               {/* Plan name */}
@@ -84,15 +77,15 @@ export function PlanSelector({ selectedPlan, onSelectPlan }: PlanSelectorProps) 
 
               {/* Features */}
               <ul className="space-y-2">
-                {info.features.map((feature, index) => (
+                {info.features.map((feature, featureIndex) => (
                   <li
-                    key={index}
+                    key={featureIndex}
                     className="flex items-start gap-2 text-sm text-muted-foreground"
                   >
                     <div
                       className={cn(
-                        'w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-gradient-to-r',
-                        info.color
+                        'w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0',
+                        isSelected ? 'bg-primary' : 'bg-muted-foreground/50'
                       )}
                     />
                     <span>{feature}</span>
@@ -109,7 +102,7 @@ export function PlanSelector({ selectedPlan, onSelectPlan }: PlanSelectorProps) 
                     : 'text-muted-foreground group-hover:text-foreground'
                 )}
               >
-                {isSelected ? '✓ Plano selecionado' : 'Clique para selecionar'}
+                {isSelected ? '✓ Selecionado' : 'Selecionar'}
               </div>
             </button>
           );
