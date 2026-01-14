@@ -4,7 +4,7 @@ import { ProgressIndicator } from './ProgressIndicator';
 import { FormCard } from './FormCard';
 import { FormStepContent } from './FormStepContent';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Send, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Send, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -83,7 +83,7 @@ export function MultiStepForm() {
 
       setIsComplete(true);
       toast({
-        title: 'Formulário enviado! 🎉',
+        title: 'Formulário enviado!',
         description: 'Recebemos suas informações com sucesso.',
       });
     } catch (error) {
@@ -101,16 +101,17 @@ export function MultiStepForm() {
   if (isComplete) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <FormCard className="text-center">
+        <FormCard className="text-center max-w-lg">
           <div className="animate-scale-in">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
-              <Sparkles className="w-10 h-10 text-white" />
+              <CheckCircle className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-3xl font-bold mb-4 gradient-text">Pronto!</h2>
-            <p className="text-lg text-muted-foreground mb-6">
+            <h2 className="text-3xl font-bold mb-4 gradient-text">Recebemos tudo!</h2>
+            <p className="text-lg text-muted-foreground mb-2">
               Suas informações foram enviadas com sucesso.
-              <br />
-              Em breve entraremos em contato!
+            </p>
+            <p className="text-muted-foreground mb-8">
+              A equipe Kenkya entrará em contato em breve para os próximos passos.
             </p>
             <Button
               onClick={() => {
@@ -119,7 +120,6 @@ export function MultiStepForm() {
                 setIsComplete(false);
               }}
               variant="outline"
-              className="mt-4"
             >
               Preencher novamente
             </Button>
@@ -133,12 +133,12 @@ export function MultiStepForm() {
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            Crie sua <span className="gradient-text">página profissional</span>
+        <div className="text-center mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2 text-foreground">
+            Briefing para sua <span className="gradient-text">Landing Page</span>
           </h1>
-          <p className="text-muted-foreground">
-            Responda algumas perguntas e deixe a mágica acontecer ✨
+          <p className="text-muted-foreground text-sm md:text-base">
+            Preencha as informações abaixo para que possamos criar sua página profissional
           </p>
         </div>
 
@@ -158,7 +158,7 @@ export function MultiStepForm() {
           />
 
           {/* Navigation */}
-          <div className="flex justify-between items-center mt-10 pt-6 border-t border-border">
+          <div className="flex justify-between items-center mt-10 pt-6 border-t border-border/50">
             <Button
               type="button"
               variant="ghost"
@@ -173,8 +173,8 @@ export function MultiStepForm() {
               Voltar
             </Button>
 
-            <div className="text-sm text-muted-foreground">
-              {currentStepIndex + 1} de {visibleSteps.length}
+            <div className="text-sm text-muted-foreground font-medium">
+              {currentStepIndex + 1} / {visibleSteps.length}
             </div>
 
             {isLastStep ? (
@@ -182,7 +182,7 @@ export function MultiStepForm() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity animate-pulse-glow"
+                className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
               >
                 {isSubmitting ? (
                   'Enviando...'
@@ -205,6 +205,11 @@ export function MultiStepForm() {
             )}
           </div>
         </FormCard>
+        
+        {/* Footer branding */}
+        <div className="text-center mt-6 text-xs text-muted-foreground/60">
+          Powered by Kenkya
+        </div>
       </div>
     </div>
   );

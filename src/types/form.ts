@@ -86,7 +86,7 @@ export const formSteps: FormStep[] = [
   {
     id: 'plan',
     title: 'Escolha seu Plano',
-    description: 'Selecione o plano ideal para você',
+    description: 'Qual nível de página você precisa?',
     fields: ['chosenPlan'],
   },
   {
@@ -115,29 +115,26 @@ export const formSteps: FormStep[] = [
 export const planInfo = {
   presenca: {
     name: 'Presença',
-    description: 'Ideal para quem está começando',
+    description: 'Página profissional com as informações essenciais do seu negócio.',
     color: 'from-blue-500 to-cyan-500',
-    icon: '🌟',
-    features: ['Resumo Profissional', 'Seus Serviços', 'Local e Horário', 'Objetivo Principal'],
+    features: ['Resumo Profissional', 'Lista de Serviços', 'Local e Horário', 'Objetivo Principal'],
   },
   conversao: {
     name: 'Conversão',
-    description: 'Foco em transformar visitantes em clientes',
+    description: 'Página estratégica focada em transformar visitantes em clientes.',
     color: 'from-purple-500 to-pink-500',
-    icon: '🚀',
     features: [
       'Tudo do Presença',
       'Dores & Soluções',
       'Diferenciais Competitivos',
-      'Depoimentos',
-      'Processo Visual',
+      'Seção de Depoimentos',
+      'Processo de Atendimento',
     ],
   },
   autoridade: {
     name: 'Autoridade',
-    description: 'Máximo impacto e credibilidade',
+    description: 'Página completa que posiciona você como referência no mercado.',
     color: 'from-amber-500 to-orange-500',
-    icon: '👑',
     features: [
       'Tudo do Conversão',
       'FAQ Completo',
