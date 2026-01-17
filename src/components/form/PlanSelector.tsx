@@ -11,15 +11,9 @@ export function PlanSelector({ selectedPlan, onSelectPlan }: PlanSelectorProps) 
   const plans: PlanType[] = ['presenca', 'conversao', 'autoridade'];
 
   return (
-    <div className="space-y-6">
-      <div className="text-center mb-4">
-        <p className="text-muted-foreground">
-          Selecione o plano que melhor atende às necessidades do seu negócio
-        </p>
-      </div>
-      
-      <div className="grid gap-4 md:grid-cols-3">
-        {plans.map((plan, index) => {
+    <div className="space-y-4">
+      <div className="grid gap-3">
+        {plans.map((plan) => {
           const info = planInfo[plan];
           const isSelected = selectedPlan === plan;
 
@@ -29,84 +23,52 @@ export function PlanSelector({ selectedPlan, onSelectPlan }: PlanSelectorProps) 
               type="button"
               onClick={() => onSelectPlan(plan)}
               className={cn(
-                'relative p-6 rounded-2xl text-left transition-all duration-300 group overflow-hidden',
-                'border-2',
+                'relative p-4 sm:p-5 rounded-xl text-left transition-all duration-300',
+                'border-2 flex items-center gap-4',
                 isSelected
-                  ? 'border-primary bg-primary/10 shadow-xl shadow-primary/20 scale-[1.02]'
-                  : 'border-border/50 bg-card/50 hover:border-primary/30 hover:bg-card/80 hover:shadow-lg'
+                  ? 'border-primary bg-primary/10 shadow-lg'
+                  : 'border-border/50 bg-card/50 hover:border-primary/30 hover:bg-card/80'
               )}
             >
-              {/* Background gradient on hover/selected */}
+              {/* Radio indicator */}
               <div
                 className={cn(
-                  'absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none',
-                  'bg-gradient-to-br',
-                  info.color,
-                  isSelected ? 'opacity-5' : 'group-hover:opacity-5'
-                )}
-              />
-
-              {/* Selected indicator */}
-              {isSelected && (
-                <div className="absolute top-4 right-4 w-7 h-7 rounded-full bg-primary flex items-center justify-center animate-scale-in shadow-lg">
-                  <Check className="w-4 h-4 text-primary-foreground" />
-                </div>
-              )}
-
-              {/* Plan number badge */}
-              <div
-                className={cn(
-                  'w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg font-bold transition-all duration-300',
+                  'w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all',
                   isSelected
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary'
+                    ? 'border-primary bg-primary'
+                    : 'border-muted-foreground/40'
                 )}
               >
-                {index + 1}
+                {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
               </div>
 
-              {/* Plan name */}
-              <h3 className="text-xl font-bold mb-2 text-foreground">
-                {info.name}
-              </h3>
-
-              {/* Description */}
-              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                {info.description}
-              </p>
-
-              {/* Features */}
-              <ul className="space-y-2">
-                {info.features.map((feature, featureIndex) => (
-                  <li
-                    key={featureIndex}
-                    className="flex items-start gap-2 text-sm text-muted-foreground"
-                  >
-                    <div
-                      className={cn(
-                        'w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0',
-                        isSelected ? 'bg-primary' : 'bg-muted-foreground/50'
-                      )}
-                    />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Selection hint */}
-              <div
-                className={cn(
-                  'mt-5 pt-4 border-t border-border/50 text-center text-sm font-medium transition-all duration-300',
-                  isSelected
-                    ? 'text-primary'
-                    : 'text-muted-foreground group-hover:text-foreground'
-                )}
-              >
-                {isSelected ? '✓ Selecionado' : 'Selecionar'}
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">
+                  {info.name}
+                </h3>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {info.shortDescription}
+                </p>
               </div>
             </button>
           );
         })}
+      </div>
+
+      {/* Details of selected plan */}
+      <div className="mt-4 p-4 rounded-xl bg-muted/30 border border-border/50">
+        <p className="text-sm font-medium text-foreground mb-2">
+          O que está incluso no {planInfo[selectedPlan].name}:
+        </p>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+          {planInfo[selectedPlan].features.map((feature, idx) => (
+            <li key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+              <span className="truncate">{feature}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

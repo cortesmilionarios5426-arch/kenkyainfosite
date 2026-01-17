@@ -115,30 +115,33 @@ export const formSteps: FormStep[] = [
 export const planInfo = {
   presenca: {
     name: 'Presença',
+    shortDescription: 'Informações essenciais do seu negócio',
     description: 'Página profissional com as informações essenciais do seu negócio.',
     color: 'from-blue-500 to-cyan-500',
     features: ['Resumo Profissional', 'Lista de Serviços', 'Local e Horário', 'Objetivo Principal'],
   },
   conversao: {
     name: 'Conversão',
+    shortDescription: 'Foco em transformar visitantes em clientes',
     description: 'Página estratégica focada em transformar visitantes em clientes.',
     color: 'from-purple-500 to-pink-500',
     features: [
       'Tudo do Presença',
       'Dores & Soluções',
-      'Diferenciais Competitivos',
-      'Seção de Depoimentos',
+      'Diferenciais',
+      'Depoimentos',
       'Processo de Atendimento',
     ],
   },
   autoridade: {
     name: 'Autoridade',
+    shortDescription: 'Posiciona você como referência no mercado',
     description: 'Página completa que posiciona você como referência no mercado.',
     color: 'from-amber-500 to-orange-500',
     features: [
       'Tudo do Conversão',
       'FAQ Completo',
-      'Galeria de Resultados',
+      'Galeria (até 8 fotos)',
       'Design Premium',
       'Rodapé com Mapa',
     ],
