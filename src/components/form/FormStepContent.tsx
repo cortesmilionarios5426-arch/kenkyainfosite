@@ -5,7 +5,8 @@ import { Label } from '@/components/ui/label';
 import { PlanSelector } from './PlanSelector';
 import { SocialNetworkInput } from './SocialNetworkInput';
 import { TestimonialInput, Testimonial } from './TestimonialInput';
-import { Image, X, Palette } from 'lucide-react';
+import { ColorSelector } from './ColorSelector';
+import { Image, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,78 +28,58 @@ const fieldLabels: Record<keyof FormData, string> = {
   chosenPlan: 'Plano escolhido',
   professionalSummary: 'Resumo profissional',
   services: 'Seus serviços',
-  locationHours: 'Local e horário de funcionamento',
-  mainObjective: 'Objetivo principal da página',
+  locationHours: 'Local e horário',
+  mainObjective: 'Objetivo da página',
   painSolutions: 'Dores & Soluções',
-  competitiveDifferentials: 'Diferenciais competitivos',
+  competitiveDifferentials: 'Seus diferenciais',
   testimonialsSection: 'Depoimentos de clientes',
-  visualProcess: 'Processo de atendimento',
-  faq: 'FAQ - Perguntas frequentes',
-  resultsGallery: 'Galeria de resultados',
-  premiumVisualStyle: 'Estilo visual premium',
-  advancedFooterMap: 'Rodapé avançado com mapa',
+  visualProcess: 'Como funciona seu atendimento',
+  faq: 'Perguntas frequentes',
+  resultsGallery: 'Galeria de resultados (até 8 fotos)',
+  premiumVisualStyle: 'Estilo visual da página',
+  advancedFooterMap: 'Endereço para o mapa',
 };
 
+// Placeholders curtos e genéricos, focados em mobile
 const fieldPlaceholders: Record<keyof FormData, string> = {
-  businessName: 'Ex: Studio Ana Makeup, Clínica Dr. João Silva, Barbearia Vintage',
-  mainService: 'Ex: Maquiagem profissional para noivas e festas, Tratamento de acne, Corte masculino moderno',
-  businessColors: 'Ex: Rosa claro, dourado e branco',
-  whatsappNumber: 'Ex: (11) 99999-9999',
+  businessName: 'Ex: Studio Maria, Clínica Saúde+',
+  mainService: 'Ex: Consultoria, Design, Aulas',
+  businessColors: '',
+  whatsappNumber: '(11) 99999-9999',
   socialNetworks: '',
   logoUrl: '',
   chosenPlan: '',
-  professionalSummary: `Ex: Sou maquiadora profissional há 8 anos, especializada em noivas e formandas. Já atendi mais de 500 clientes e minha missão é realçar a beleza natural de cada mulher com técnicas atuais e produtos de alta qualidade.`,
+  professionalSummary: 'Conte brevemente quem você é, sua experiência e o que faz de especial.',
   services: `Ex:
-• Maquiagem para Noivas - R$ 350
-• Maquiagem Social (festas/eventos) - R$ 180  
-• Curso de Automaquiagem - R$ 250
-• Pacote Noiva + Madrinhas (desconto especial)`,
-  locationHours: `Ex: Atendo em estúdio próprio na Av. Paulista, 1000 - Sala 302
-Seg a Sex: 9h às 19h | Sáb: 8h às 16h
-Atendimento a domicílio sob consulta`,
-  mainObjective: 'Ex: Quero que os visitantes agendem uma avaliação gratuita pelo WhatsApp',
+• Serviço 1 - R$ 100
+• Serviço 2 - R$ 200
+• Pacote especial`,
+  locationHours: `Ex: Rua Exemplo, 123
+Seg a Sex: 9h às 18h`,
+  mainObjective: 'Ex: Quero que agendem pelo WhatsApp',
   painSolutions: `Ex:
-PROBLEMA: Cliente não sabe qual maquiagem combina com seu rosto
-SOLUÇÃO: Ofereço consultoria de coloração pessoal incluída no serviço
-
-PROBLEMA: Medo de parecer "muito maquiada" 
-SOLUÇÃO: Técnica de maquiagem natural que realça sem exageros`,
+PROBLEMA: [Dificuldade do cliente]
+SOLUÇÃO: [Como você resolve]`,
   competitiveDifferentials: `Ex:
-• 8 anos de experiência com noivas
-• Produtos importados de alta durabilidade
-• Prova de maquiagem incluída no pacote noiva
-• Atendimento personalizado (máx. 2 noivas por dia)
-• 100% de avaliações 5 estrelas no Google`,
+• Anos de experiência
+• Atendimento personalizado
+• Produtos de qualidade`,
   testimonialsSection: '',
   visualProcess: `Ex:
-1º CONTATO: Conversamos pelo WhatsApp para entender o evento
-2º PROVA: Agendamos uma prova de maquiagem 15 dias antes
-3º GRANDE DIA: Chego 2h antes para garantir um resultado perfeito
-4º PÓS: Envio kit retoque e dicas para a maquiagem durar toda a festa`,
+1º Contato inicial
+2º Orçamento
+3º Execução
+4º Entrega`,
   faq: `Ex:
-P: A maquiagem dura o dia todo?
-R: Sim! Uso primers e fixadores profissionais que garantem duração de 12h+
+P: Qual o prazo?
+R: [Sua resposta]
 
-P: Vocês atendem a domicílio?
-R: Sim, com taxa de deslocamento a partir de R$ 50 dependendo da região
-
-P: Posso fazer prova antes do evento?
-R: Para noivas, a prova está incluída. Para outros eventos, consulte disponibilidade`,
-  resultsGallery: `Ex:
-• 10 fotos de antes/depois de noivas
-• Vídeos curtos de transformações
-• Prints de avaliações do Google/Instagram
-• Certificados de cursos que fiz
-• Fotos minhas trabalhando (bastidores)`,
-  premiumVisualStyle: `Ex:
-Quero um visual elegante e romântico, com tons de rosa e dourado.
-Fontes delicadas e femininas.
-Fotos com filtro suave, estilo Pinterest.
-Referência: @maquiadoresucesso no Instagram`,
-  advancedFooterMap: `Ex: Rua das Flores, 123 - Sala 45
-Bairro Jardim América, São Paulo - SP
-CEP: 01234-567
-(Próximo ao Metrô Consolação)`,
+P: Faz a domicílio?
+R: [Sua resposta]`,
+  resultsGallery: 'Descreva as fotos que quer incluir (máximo 8). Ex: fotos de trabalhos, antes/depois, certificados.',
+  premiumVisualStyle: 'Ex: Moderno, Colorido, Sério, Alegre, Minimalista, Luxuoso',
+  advancedFooterMap: `Ex: Rua das Flores, 123
+São Paulo - SP, 01234-567`,
 };
 
 const fieldDescriptions: Record<string, string> = {
@@ -326,52 +307,12 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
     // Special case: Colors
     if (field === 'businessColors') {
       return (
-        <div key={field} className="space-y-3 animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
-          <Label htmlFor={field} className="text-base font-medium flex items-center gap-2">
-            <Palette className="w-4 h-4 text-primary" />
-            {label}
-          </Label>
-          {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          )}
-          <Input
-            id={field}
-            value={formData[field] as string}
-            onChange={(e) => updateField(field, e.target.value as FormData[typeof field])}
-            placeholder={placeholder}
-            className="form-input-animated"
+        <div key={field} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <ColorSelector
+            value={formData.businessColors}
+            onChange={(value) => updateField('businessColors', value)}
+            logoUrl={formData.logoUrl}
           />
-          <div className="flex gap-2 flex-wrap">
-            {[
-              { hex: '#E91E63', name: 'Rosa' },
-              { hex: '#9C27B0', name: 'Roxo' },
-              { hex: '#2196F3', name: 'Azul' },
-              { hex: '#4CAF50', name: 'Verde' },
-              { hex: '#FF9800', name: 'Laranja' },
-              { hex: '#795548', name: 'Marrom' },
-              { hex: '#000000', name: 'Preto' },
-              { hex: '#FFFFFF', name: 'Branco' },
-            ].map((color) => (
-              <button
-                key={color.hex}
-                type="button"
-                title={color.name}
-                className={cn(
-                  'w-9 h-9 rounded-lg border-2 hover:scale-110 transition-all duration-200 shadow-sm',
-                  formData.businessColors.includes(color.name)
-                    ? 'border-primary ring-2 ring-primary/30'
-                    : 'border-border/50'
-                )}
-                style={{ backgroundColor: color.hex }}
-                onClick={() => {
-                  const currentColors = formData.businessColors;
-                  if (!currentColors.includes(color.name)) {
-                    updateField('businessColors', currentColors ? `${currentColors}, ${color.name}` : color.name);
-                  }
-                }}
-              />
-            ))}
-          </div>
         </div>
       );
     }
