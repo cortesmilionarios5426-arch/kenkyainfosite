@@ -40,46 +40,38 @@ const fieldLabels: Record<keyof FormData, string> = {
   advancedFooterMap: 'Endereço para o mapa',
 };
 
-// Placeholders curtos e genéricos, focados em mobile
+// Placeholders curtos para mobile - tema: criação de sites
 const fieldPlaceholders: Record<keyof FormData, string> = {
-  businessName: 'Ex: Studio Maria, Clínica Saúde+',
-  mainService: 'Ex: Consultoria, Design, Aulas',
+  businessName: 'Ex: Kenkya Sites',
+  mainService: 'Criação de sites profissionais',
   businessColors: '',
   whatsappNumber: '(11) 99999-9999',
   socialNetworks: '',
   logoUrl: '',
   chosenPlan: '',
-  professionalSummary: 'Conte brevemente quem você é, sua experiência e o que faz de especial.',
-  services: `Ex:
-• Serviço 1 - R$ 100
-• Serviço 2 - R$ 200
-• Pacote especial`,
-  locationHours: `Ex: Rua Exemplo, 123
+  professionalSummary: 'Quem é você? Experiência? Missão?',
+  services: `• Landing Page - R$ 497
+• Site Institucional - R$ 997
+• E-commerce - sob consulta`,
+  locationHours: `Online ou presencial
 Seg a Sex: 9h às 18h`,
-  mainObjective: 'Ex: Quero que agendem pelo WhatsApp',
-  painSolutions: `Ex:
-PROBLEMA: [Dificuldade do cliente]
-SOLUÇÃO: [Como você resolve]`,
-  competitiveDifferentials: `Ex:
-• Anos de experiência
-• Atendimento personalizado
-• Produtos de qualidade`,
+  mainObjective: 'Agendar reunião pelo WhatsApp',
+  painSolutions: `PROBLEMA: Não tem presença online
+SOLUÇÃO: Site profissional em 7 dias`,
+  competitiveDifferentials: `• Entrega rápida
+• Suporte incluso
+• Design exclusivo`,
   testimonialsSection: '',
-  visualProcess: `Ex:
-1º Contato inicial
-2º Orçamento
-3º Execução
+  visualProcess: `1º Briefing
+2º Criação
+3º Revisão
 4º Entrega`,
-  faq: `Ex:
-P: Qual o prazo?
-R: [Sua resposta]
-
-P: Faz a domicílio?
-R: [Sua resposta]`,
-  resultsGallery: 'Descreva as fotos que quer incluir (máximo 8). Ex: fotos de trabalhos, antes/depois, certificados.',
-  premiumVisualStyle: 'Ex: Moderno, Colorido, Sério, Alegre, Minimalista, Luxuoso',
-  advancedFooterMap: `Ex: Rua das Flores, 123
-São Paulo - SP, 01234-567`,
+  faq: `P: Qual o prazo?
+R: 7 a 15 dias úteis`,
+  resultsGallery: 'Trabalhos anteriores, prints, certificados (máx 8)',
+  premiumVisualStyle: 'Moderno, Sério, Alegre, Colorido ou Minimalista',
+  advancedFooterMap: `Rua Exemplo, 123
+São Paulo - SP`,
 };
 
 const fieldDescriptions: Record<string, string> = {

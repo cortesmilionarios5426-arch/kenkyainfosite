@@ -96,7 +96,7 @@ export function ColorSelector({ value, onChange, logoUrl }: ColorSelectorProps) 
         Cores do seu negócio
       </Label>
       <p className="text-sm text-muted-foreground">
-        Escolha até 3 cores para personalizar o design da sua página
+        Escolha até 3 cores ou extraia da sua logo (após enviar)
       </p>
 
       {/* Mode selector */}
@@ -109,27 +109,33 @@ export function ColorSelector({ value, onChange, logoUrl }: ColorSelectorProps) 
           className="flex items-center gap-2"
         >
           <Palette className="w-4 h-4" />
-          <span className="hidden sm:inline">Escolher cores</span>
-          <span className="sm:hidden">Escolher</span>
+          <span>Escolher cores</span>
         </Button>
         
-        {logoUrl && (
-          <Button
-            type="button"
-            variant={colorMode === 'extract' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => {
-              setColorMode('extract');
+        <Button
+          type="button"
+          variant={colorMode === 'extract' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => {
+            setColorMode('extract');
+            if (logoUrl) {
               extractColorsFromLogo();
-            }}
-            className="flex items-center gap-2"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span className="hidden sm:inline">Extrair da logo</span>
-            <span className="sm:hidden">Da logo</span>
-          </Button>
-        )}
+            }
+          }}
+          disabled={!logoUrl}
+          className="flex items-center gap-2"
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>Extrair da logo</span>
+        </Button>
       </div>
+
+      {/* Hint when no logo */}
+      {!logoUrl && colorMode === 'extract' && (
+        <p className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg">
+          Envie sua logo na etapa anterior para extrair as cores automaticamente
+        </p>
+      )}
 
       {/* Color display and picker */}
       <div className="flex flex-wrap items-center gap-3">
@@ -184,15 +190,15 @@ export function ColorSelector({ value, onChange, logoUrl }: ColorSelectorProps) 
       </div>
 
       {/* Help text */}
-      {selectedColors.length === 0 && (
+      {selectedColors.length === 0 && colorMode === 'manual' && (
         <p className="text-xs text-muted-foreground">
-          Clique em "+" para adicionar uma cor ou extraia automaticamente da sua logo
+          Clique em "+" para adicionar uma cor
         </p>
       )}
       
       {selectedColors.length > 0 && (
         <p className="text-xs text-muted-foreground">
-          {selectedColors.length}/3 cores selecionadas • Clique na cor para alterar
+          {selectedColors.length}/3 cores • Clique para alterar
         </p>
       )}
     </div>
