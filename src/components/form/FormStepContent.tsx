@@ -6,6 +6,7 @@ import { PlanSelector } from './PlanSelector';
 import { SocialNetworkInput } from './SocialNetworkInput';
 import { TestimonialInput, Testimonial } from './TestimonialInput';
 import { ColorSelector } from './ColorSelector';
+import { GalleryUpload } from './GalleryUpload';
 import { Image, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRef, useState, useEffect } from 'react';
@@ -309,6 +310,19 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
       );
     }
 
+    // Special case: Gallery upload
+    if (field === 'resultsGallery') {
+      return (
+        <div key={field} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <GalleryUpload
+            value={formData.resultsGallery}
+            onChange={(value) => updateField('resultsGallery', value)}
+            maxPhotos={8}
+          />
+        </div>
+      );
+    }
+
     // Text area for longer fields
     const isTextArea = [
       'professionalSummary',
@@ -318,7 +332,6 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
       'competitiveDifferentials',
       'visualProcess',
       'faq',
-      'resultsGallery',
       'premiumVisualStyle',
     ].includes(field);
 
