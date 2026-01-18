@@ -143,6 +143,21 @@
     box-shadow: var(--shadow-glow);
   }
 
+  /* Inputs e textareas mais altos para não cortar texto */
+  .form-input-tall {
+    @apply min-h-[52px] py-3 text-base leading-relaxed;
+  }
+
+  .form-textarea-tall {
+    @apply min-h-[160px] py-4 text-base leading-relaxed;
+  }
+
+  /* Placeholder styling */
+  .form-input-animated::placeholder,
+  .form-textarea-tall::placeholder {
+    @apply text-muted-foreground/60 text-sm leading-relaxed whitespace-pre-wrap;
+  }
+
   .animate-slide-up {
     animation: slideUp 0.5s ease-out forwards;
   }

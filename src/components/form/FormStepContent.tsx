@@ -41,37 +41,44 @@ const fieldLabels: Record<keyof FormData, string> = {
   advancedFooterMap: 'Endereço para o mapa',
 };
 
-// Placeholders curtos para mobile - tema: criação de sites
+// Placeholders claros que reforçam ser EXEMPLOS
 const fieldPlaceholders: Record<keyof FormData, string> = {
-  businessName: 'Ex: Kenkya Sites',
-  mainService: 'Criação de sites profissionais',
+  businessName: 'EXEMPLO: Kenkya Sites',
+  mainService: 'EXEMPLO: Criação de sites profissionais',
   businessColors: '',
-  whatsappNumber: '(11) 99999-9999',
+  whatsappNumber: 'EXEMPLO: (11) 99999-9999',
   socialNetworks: '',
   logoUrl: '',
   chosenPlan: '',
-  professionalSummary: 'Quem é você? Experiência? Missão?',
-  services: `• Landing Page - R$ 497
+  professionalSummary: 'EXEMPLO: Sou especialista em X há Y anos. Minha missão é ajudar empresas a...',
+  services: `EXEMPLO:
+• Landing Page - R$ 497
 • Site Institucional - R$ 997
 • E-commerce - sob consulta`,
-  locationHours: `Online ou presencial
-Seg a Sex: 9h às 18h`,
-  mainObjective: 'Agendar reunião pelo WhatsApp',
-  painSolutions: `PROBLEMA: Não tem presença online
+  locationHours: `EXEMPLO:
+Atendimento: Online ou Presencial
+Horário: Segunda a Sexta, 9h às 18h`,
+  mainObjective: 'EXEMPLO: Fazer o visitante agendar uma reunião pelo WhatsApp',
+  painSolutions: `EXEMPLO:
+PROBLEMA: Não tem presença online
 SOLUÇÃO: Site profissional em 7 dias`,
-  competitiveDifferentials: `• Entrega rápida
-• Suporte incluso
-• Design exclusivo`,
+  competitiveDifferentials: `EXEMPLO:
+• Entrega rápida em 7 dias
+• Suporte incluso por 30 dias
+• Design 100% exclusivo`,
   testimonialsSection: '',
-  visualProcess: `1º Briefing
-2º Criação
-3º Revisão
-4º Entrega`,
-  faq: `P: Qual o prazo?
-R: 7 a 15 dias úteis`,
-  resultsGallery: 'Trabalhos anteriores, prints, certificados (máx 8)',
-  premiumVisualStyle: 'Moderno, Sério, Alegre, Colorido ou Minimalista',
-  advancedFooterMap: `Rua Exemplo, 123
+  visualProcess: `EXEMPLO:
+1º Briefing inicial
+2º Criação do design
+3º Revisão e ajustes
+4º Entrega final`,
+  faq: `EXEMPLO:
+Pergunta: Qual é o prazo de entrega?
+Resposta: Entre 7 a 15 dias úteis`,
+  resultsGallery: '',
+  premiumVisualStyle: 'EXEMPLO: Moderno e minimalista, com cores sóbrias e tipografia elegante',
+  advancedFooterMap: `EXEMPLO:
+Rua das Flores, 123 - Centro
 São Paulo - SP`,
 };
 
@@ -347,8 +354,8 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
             value={formData[field] as string}
             onChange={(e) => updateField(field, e.target.value as FormData[typeof field])}
             placeholder={placeholder}
-            className="form-input-animated min-h-[140px] resize-none"
-            rows={5}
+            className="form-input-animated form-textarea-tall resize-none"
+            rows={6}
           />
         </div>
       );
@@ -366,7 +373,7 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
           value={formData[field] as string}
           onChange={(e) => updateField(field, e.target.value as FormData[typeof field])}
           placeholder={placeholder}
-          className="form-input-animated"
+          className="form-input-animated form-input-tall"
         />
       </div>
     );
