@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { LogIn, LogOut, Trash2, Eye, RefreshCw, Users, FileText } from 'lucide-react';
+import { LogIn, LogOut, Trash2, Eye, RefreshCw, Users, FileText, Copy, Download, Image } from 'lucide-react';
 import { planInfo } from '@/types/form';
 import { cn } from '@/lib/utils';
 
@@ -382,105 +382,327 @@ export default function Admin() {
 
         {/* Detail Modal */}
         <Dialog open={!!selectedResponse} onOpenChange={() => setSelectedResponse(null)}>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto glass-card border-border">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto glass-card border-border">
             <DialogHeader>
               <DialogTitle className="gradient-text">{selectedResponse?.business_name}</DialogTitle>
               <DialogDescription>{selectedResponse?.main_service}</DialogDescription>
             </DialogHeader>
             
             {selectedResponse && (
-              <Tabs defaultValue="basic" className="mt-4">
-                <TabsList className="grid grid-cols-3 w-full">
-                  <TabsTrigger value="basic">Básico</TabsTrigger>
-                  <TabsTrigger value="content">Conteúdo</TabsTrigger>
-                  <TabsTrigger value="advanced">Avançado</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="basic" className="space-y-4 mt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">WhatsApp</p>
-                      <p className="font-medium">{selectedResponse.whatsapp_number}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Cores</p>
-                      <p className="font-medium">{selectedResponse.business_colors}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Plano</p>
-                      <Badge className={cn('border', getPlanBadgeColor(selectedResponse.chosen_plan))}>
-                        {planInfo[selectedResponse.chosen_plan]?.name}
-                      </Badge>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Redes Sociais</p>
-                      <p className="font-medium">
-                        {Array.isArray(selectedResponse.social_networks) 
-                          ? selectedResponse.social_networks.length + ' redes'
-                          : '0 redes'}
-                      </p>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="content" className="space-y-4 mt-4">
-                  {selectedResponse.professional_summary && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Resumo Profissional</p>
-                      <p className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.professional_summary}</p>
-                    </div>
+              <>
+                {/* Action buttons */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const text = formatResponseForCopy(selectedResponse);
+                      navigator.clipboard.writeText(text);
+                      toast({ title: 'Copiado para a área de transferência!' });
+                    }}
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copiar tudo
+                  </Button>
+                  
+                  {getGalleryPhotos(selectedResponse.results_gallery).length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadAllPhotos(selectedResponse)}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Baixar fotos ({getGalleryPhotos(selectedResponse.results_gallery).length})
+                    </Button>
                   )}
-                  {selectedResponse.services && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Serviços</p>
-                      <p className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.services}</p>
+                </div>
+
+                <Tabs defaultValue="basic" className="mt-2">
+                  <TabsList className="grid grid-cols-4 w-full">
+                    <TabsTrigger value="basic">Básico</TabsTrigger>
+                    <TabsTrigger value="content">Conteúdo</TabsTrigger>
+                    <TabsTrigger value="advanced">Avançado</TabsTrigger>
+                    <TabsTrigger value="gallery">Galeria</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="basic" className="space-y-4 mt-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">WhatsApp</p>
+                        <p className="font-medium">{selectedResponse.whatsapp_number}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Cores</p>
+                        <div className="flex gap-2 mt-1">
+                          {selectedResponse.business_colors.split(',').map((color, i) => (
+                            <div
+                              key={i}
+                              className="w-6 h-6 rounded-lg border border-border"
+                              style={{ backgroundColor: color.trim() }}
+                              title={color.trim()}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Plano</p>
+                        <Badge className={cn('border mt-1', getPlanBadgeColor(selectedResponse.chosen_plan))}>
+                          {planInfo[selectedResponse.chosen_plan]?.name}
+                        </Badge>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Redes Sociais</p>
+                        {Array.isArray(selectedResponse.social_networks) && selectedResponse.social_networks.length > 0 ? (
+                          <div className="space-y-1 mt-1">
+                            {selectedResponse.social_networks.map((net: any, i: number) => (
+                              <a key={i} href={net.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline block">
+                                {net.platform}: {net.url}
+                              </a>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Nenhuma</p>
+                        )}
+                      </div>
+                      {selectedResponse.logo_url && (
+                        <div className="col-span-2">
+                          <p className="text-sm text-muted-foreground mb-2">Logo</p>
+                          <img src={selectedResponse.logo_url} alt="Logo" className="w-24 h-24 object-contain rounded-lg border border-border" />
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {selectedResponse.location_hours && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Local e Horário</p>
-                      <p className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.location_hours}</p>
-                    </div>
-                  )}
-                  {selectedResponse.main_objective && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Objetivo Principal</p>
-                      <p className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.main_objective}</p>
-                    </div>
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="advanced" className="space-y-4 mt-4">
-                  {selectedResponse.pain_solutions && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Dores & Soluções</p>
-                      <p className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.pain_solutions}</p>
-                    </div>
-                  )}
-                  {selectedResponse.competitive_differentials && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Diferenciais</p>
-                      <p className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.competitive_differentials}</p>
-                    </div>
-                  )}
-                  {selectedResponse.testimonials_section && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Depoimentos</p>
-                      <p className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.testimonials_section}</p>
-                    </div>
-                  )}
-                  {selectedResponse.faq && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">FAQ</p>
-                      <p className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.faq}</p>
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
+                  </TabsContent>
+                  
+                  <TabsContent value="content" className="space-y-4 mt-4">
+                    {selectedResponse.professional_summary && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Resumo Profissional</p>
+                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.professional_summary}</pre>
+                      </div>
+                    )}
+                    {selectedResponse.services && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Serviços</p>
+                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.services}</pre>
+                      </div>
+                    )}
+                    {selectedResponse.location_hours && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Local e Horário</p>
+                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.location_hours}</pre>
+                      </div>
+                    )}
+                    {selectedResponse.main_objective && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Objetivo Principal</p>
+                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.main_objective}</pre>
+                      </div>
+                    )}
+                    {selectedResponse.testimonials_section && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Depoimentos</p>
+                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{formatTestimonials(selectedResponse.testimonials_section)}</pre>
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="advanced" className="space-y-4 mt-4">
+                    {selectedResponse.pain_solutions && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Dores & Soluções</p>
+                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.pain_solutions}</pre>
+                      </div>
+                    )}
+                    {selectedResponse.competitive_differentials && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Diferenciais</p>
+                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.competitive_differentials}</pre>
+                      </div>
+                    )}
+                    {selectedResponse.visual_process && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Processo de Atendimento</p>
+                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.visual_process}</pre>
+                      </div>
+                    )}
+                    {selectedResponse.faq && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">FAQ</p>
+                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.faq}</pre>
+                      </div>
+                    )}
+                    {selectedResponse.premium_visual_style && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Estilo Visual</p>
+                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.premium_visual_style}</pre>
+                      </div>
+                    )}
+                    {selectedResponse.advanced_footer_map && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Endereço</p>
+                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.advanced_footer_map}</pre>
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="gallery" className="mt-4">
+                    {(() => {
+                      const photos = getGalleryPhotos(selectedResponse.results_gallery);
+                      if (photos.length === 0) {
+                        return (
+                          <div className="text-center py-12 text-muted-foreground">
+                            <Image className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                            <p>Nenhuma foto enviada</p>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {photos.map((url, index) => (
+                            <a
+                              key={index}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="aspect-square rounded-xl overflow-hidden border-2 border-border hover:border-primary transition-colors"
+                            >
+                              <img src={url} alt={`Foto ${index + 1}`} className="w-full h-full object-cover" />
+                            </a>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </TabsContent>
+                </Tabs>
+              </>
             )}
           </DialogContent>
         </Dialog>
       </div>
     </div>
   );
+
+  // Helper functions
+  function formatResponseForCopy(response: FormResponse): string {
+    const sections: string[] = [];
+    
+    sections.push(`=== ${response.business_name.toUpperCase()} ===`);
+    sections.push(`Serviço: ${response.main_service}`);
+    sections.push(`Plano: ${planInfo[response.chosen_plan]?.name}`);
+    sections.push(`WhatsApp: ${response.whatsapp_number}`);
+    sections.push(`Cores: ${response.business_colors}`);
+    
+    if (response.logo_url) {
+      sections.push(`\nLogo: ${response.logo_url}`);
+    }
+    
+    if (Array.isArray(response.social_networks) && response.social_networks.length > 0) {
+      sections.push(`\n--- REDES SOCIAIS ---`);
+      response.social_networks.forEach((net: any) => {
+        sections.push(`${net.platform}: ${net.url}`);
+      });
+    }
+    
+    if (response.professional_summary) {
+      sections.push(`\n--- RESUMO PROFISSIONAL ---\n${response.professional_summary}`);
+    }
+    
+    if (response.services) {
+      sections.push(`\n--- SERVIÇOS ---\n${response.services}`);
+    }
+    
+    if (response.location_hours) {
+      sections.push(`\n--- LOCAL E HORÁRIO ---\n${response.location_hours}`);
+    }
+    
+    if (response.main_objective) {
+      sections.push(`\n--- OBJETIVO ---\n${response.main_objective}`);
+    }
+    
+    if (response.pain_solutions) {
+      sections.push(`\n--- DORES & SOLUÇÕES ---\n${response.pain_solutions}`);
+    }
+    
+    if (response.competitive_differentials) {
+      sections.push(`\n--- DIFERENCIAIS ---\n${response.competitive_differentials}`);
+    }
+    
+    if (response.testimonials_section) {
+      sections.push(`\n--- DEPOIMENTOS ---\n${formatTestimonials(response.testimonials_section)}`);
+    }
+    
+    if (response.visual_process) {
+      sections.push(`\n--- PROCESSO DE ATENDIMENTO ---\n${response.visual_process}`);
+    }
+    
+    if (response.faq) {
+      sections.push(`\n--- FAQ ---\n${response.faq}`);
+    }
+    
+    if (response.premium_visual_style) {
+      sections.push(`\n--- ESTILO VISUAL ---\n${response.premium_visual_style}`);
+    }
+    
+    if (response.advanced_footer_map) {
+      sections.push(`\n--- ENDEREÇO ---\n${response.advanced_footer_map}`);
+    }
+    
+    const photos = getGalleryPhotos(response.results_gallery);
+    if (photos.length > 0) {
+      sections.push(`\n--- GALERIA (${photos.length} fotos) ---`);
+      photos.forEach((url, i) => {
+        sections.push(`Foto ${i + 1}: ${url}`);
+      });
+    }
+    
+    return sections.join('\n');
+  }
+
+  function formatTestimonials(json: string): string {
+    try {
+      const testimonials = JSON.parse(json);
+      if (!Array.isArray(testimonials)) return json;
+      return testimonials.map((t: any) => `"${t.text}" - ${t.name}`).join('\n\n');
+    } catch {
+      return json;
+    }
+  }
+
+  function getGalleryPhotos(gallery: string | null): string[] {
+    if (!gallery) return [];
+    try {
+      const parsed = JSON.parse(gallery);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  async function downloadAllPhotos(response: FormResponse) {
+    const photos = getGalleryPhotos(response.results_gallery);
+    if (photos.length === 0) return;
+
+    toast({ title: 'Iniciando downloads...' });
+
+    for (let i = 0; i < photos.length; i++) {
+      const url = photos[i];
+      try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${response.business_name.replace(/\s+/g, '_')}_foto_${i + 1}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        // Small delay between downloads
+        await new Promise(resolve => setTimeout(resolve, 300));
+      } catch (error) {
+        console.error('Download error:', error);
+      }
+    }
+    
+    toast({ title: `${photos.length} fotos baixadas!` });
+  }
 }
