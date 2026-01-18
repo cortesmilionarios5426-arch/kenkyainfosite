@@ -236,10 +236,14 @@ export default function Admin() {
               Você não tem permissão para acessar este painel.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button onClick={handleLogout} variant="outline">
+          <CardContent className="flex justify-center">
+            <Button 
+              onClick={handleLogout} 
+              variant="destructive"
+              className="cursor-pointer"
+            >
               <LogOut className="w-4 h-4 mr-2" />
-              Sair
+              Sair e fazer login novamente
             </Button>
           </CardContent>
         </Card>
