@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { LogIn, LogOut, Trash2, Eye, RefreshCw, Users, FileText, Copy, Download, Image } from 'lucide-react';
 import { planInfo } from '@/types/form';
 import { cn } from '@/lib/utils';
+import { BrandingPdfGenerator } from '@/components/admin/BrandingPdfGenerator';
 
 interface FormResponse {
   id: string;
@@ -462,6 +463,12 @@ export default function Admin() {
                     <Copy className="w-4 h-4 mr-2" />
                     Copiar tudo
                   </Button>
+                  
+                  <BrandingPdfGenerator
+                    businessName={selectedResponse.business_name}
+                    businessColors={selectedResponse.business_colors}
+                    logoUrl={selectedResponse.logo_url}
+                  />
                   
                   {getGalleryPhotos(selectedResponse.results_gallery).length > 0 && (
                     <Button
