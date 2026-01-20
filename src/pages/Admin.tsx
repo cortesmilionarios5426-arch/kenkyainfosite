@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,7 +41,9 @@ export default function Admin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [isCheckingRole, setIsCheckingRole] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [responses, setResponses] = useState<FormResponse[]>([]);
   const [selectedResponse, setSelectedResponse] = useState<FormResponse | null>(null);
@@ -48,46 +51,65 @@ export default function Admin() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Listener precisa ser síncrono (evita travamentos / deadlocks)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        // Check if user is admin
-        const { data: roles } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin');
-        
-        setIsAdmin(roles && roles.length > 0);
-        
-        if (roles && roles.length > 0) {
-          fetchResponses();
-        }
-      } else {
-        setIsAdmin(false);
-        setResponses([]);
-      }
     });
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        const { data: roles } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin');
-        
-        setIsAdmin(roles && roles.length > 0);
-        
-        if (roles && roles.length > 0) {
-          fetchResponses();
-        }
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setIsCheckingRole(false);
+      setIsAdmin(false);
+      setResponses([]);
+      return;
+    }
+
+    setIsCheckingRole(true);
+
+    let cancelled = false;
+    setTimeout(() => {
+      (async () => {
+        const { data: roles, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin');
+
+        if (cancelled) return;
+
+        if (error) {
+          setIsAdmin(false);
+          toast({
+            title: 'Erro ao verificar permissão',
+            description: error.message,
+            variant: 'destructive',
+          });
+        } else {
+          const ok = !!roles && roles.length > 0;
+          setIsAdmin(ok);
+          if (ok) fetchResponses();
+        }
+
+        setIsCheckingRole(false);
+      })();
+    }, 0);
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const fetchResponses = async () => {
     setIsLoadingData(true);
@@ -137,8 +159,20 @@ export default function Admin() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast({ title: 'Logout realizado' });
+    setIsLoading(true);
+    const { error } = await supabase.auth.signOut();
+    setIsLoading(false);
+
+    if (error) {
+      toast({
+        title: 'Erro ao sair',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    toast({ title: 'Você saiu da conta' });
   };
 
   const handleDelete = async (id: string) => {
@@ -225,6 +259,22 @@ export default function Admin() {
     );
   }
 
+  // Logged in: checking permissions
+  if (isCheckingRole) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <Card className="w-full max-w-md glass-card border-border text-center">
+          <CardHeader>
+            <CardTitle className="text-2xl gradient-text">Verificando acesso…</CardTitle>
+            <CardDescription>
+              {user?.email ? `Logado como ${user.email}` : 'Carregando sua sessão'}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
   // Logged in but not admin
   if (!isAdmin) {
     return (
@@ -233,17 +283,21 @@ export default function Admin() {
           <CardHeader>
             <CardTitle className="text-2xl text-destructive">Acesso Negado</CardTitle>
             <CardDescription>
-              Você não tem permissão para acessar este painel.
+              {user?.email
+                ? `Você está logado como ${user.email}, mas este usuário não é admin.`
+                : 'Você não tem permissão para acessar este painel.'}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Button 
-              onClick={handleLogout} 
+            <Button
+              type="button"
+              onClick={handleLogout}
               variant="destructive"
               className="cursor-pointer"
+              disabled={isLoading}
             >
               <LogOut className="w-4 h-4 mr-2" />
-              Sair e fazer login novamente
+              {isLoading ? 'Saindo…' : 'Sair e fazer login novamente'}
             </Button>
           </CardContent>
         </Card>
