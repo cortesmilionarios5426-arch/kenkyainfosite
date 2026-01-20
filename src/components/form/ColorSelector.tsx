@@ -147,7 +147,7 @@ export function ColorSelector({ value, onChange, logoUrl }: ColorSelectorProps) 
               onClick={() => openColorPicker(index)}
               className="w-12 h-12 rounded-xl border-2 border-border shadow-md transition-all duration-200 hover:scale-110 hover:shadow-lg"
               style={{ backgroundColor: color.hex }}
-              title={`Cor ${index + 1}: ${color.hex}`}
+              title={`Clique para editar: ${color.hex}`}
             />
             <button
               type="button"
@@ -166,8 +166,8 @@ export function ColorSelector({ value, onChange, logoUrl }: ColorSelectorProps) 
           </div>
         ))}
 
-        {/* Add color button */}
-        {selectedColors.length < 3 && colorMode === 'manual' && (
+        {/* Add color button - always show if less than 3 colors (manual or extract) */}
+        {selectedColors.length < 3 && (
           <button
             type="button"
             onClick={() => openColorPicker(selectedColors.length)}
@@ -176,6 +176,7 @@ export function ColorSelector({ value, onChange, logoUrl }: ColorSelectorProps) 
               'flex items-center justify-center transition-all duration-200',
               'hover:border-primary hover:bg-primary/5 hover:scale-105'
             )}
+            title="Adicionar cor"
           >
             <Plus className="w-5 h-5 text-muted-foreground" />
             <input
@@ -198,7 +199,7 @@ export function ColorSelector({ value, onChange, logoUrl }: ColorSelectorProps) 
       
       {selectedColors.length > 0 && (
         <p className="text-xs text-muted-foreground">
-          {selectedColors.length}/3 cores • Clique para alterar
+          {selectedColors.length}/3 cores • Clique na cor para editar, ou no X para remover
         </p>
       )}
     </div>
