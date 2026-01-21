@@ -1,4 +1,4 @@
-import { FormData, FormStep } from '@/types/form';
+import { FormData, FormStep, initialDomainRegistration } from '@/types/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -7,6 +7,8 @@ import { SocialNetworkInput } from './SocialNetworkInput';
 import { TestimonialInput, Testimonial } from './TestimonialInput';
 import { ColorSelector } from './ColorSelector';
 import { GalleryUpload } from './GalleryUpload';
+import { HostingSelector } from './HostingSelector';
+import { DomainRegistrationForm } from './DomainRegistrationForm';
 import { Image, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRef, useState, useEffect } from 'react';
@@ -27,6 +29,8 @@ const fieldLabels: Record<keyof FormData, string> = {
   socialNetworks: 'Redes sociais',
   logoUrl: 'Logo da sua marca',
   chosenPlan: 'Plano escolhido',
+  hostingOption: 'Opção de hospedagem',
+  domainRegistration: 'Dados para registro',
   professionalSummary: 'Resumo profissional',
   services: 'Seus serviços',
   locationHours: 'Local e horário',
@@ -35,6 +39,7 @@ const fieldLabels: Record<keyof FormData, string> = {
   competitiveDifferentials: 'Seus diferenciais',
   testimonialsSection: 'Depoimentos de clientes',
   visualProcess: 'Como funciona seu atendimento',
+  conversionGallery: 'Galeria (até 2 fotos)',
   faq: 'Perguntas frequentes',
   resultsGallery: 'Galeria de resultados (até 8 fotos)',
   premiumVisualStyle: 'Estilo visual da página',
@@ -50,6 +55,8 @@ const fieldPlaceholders: Record<keyof FormData, string> = {
   socialNetworks: '',
   logoUrl: '',
   chosenPlan: '',
+  hostingOption: '',
+  domainRegistration: '',
   professionalSummary: 'EXEMPLO: Sou especialista em X há Y anos. Minha missão é ajudar empresas a...',
   services: `EXEMPLO:
 • Landing Page - R$ 497
@@ -72,6 +79,7 @@ SOLUÇÃO: Site profissional em 7 dias`,
 2º Criação do design
 3º Revisão e ajustes
 4º Entrega final`,
+  conversionGallery: '',
   faq: `EXEMPLO:
 Pergunta: Qual é o prazo de entrega?
 Resposta: Entre 7 a 15 dias úteis`,
@@ -95,6 +103,7 @@ const fieldDescriptions: Record<string, string> = {
   competitiveDifferentials: 'Por que escolher você e não a concorrência?',
   testimonialsSection: 'Adicione depoimentos reais de clientes satisfeitos',
   visualProcess: 'Descreva passo a passo como funciona seu atendimento',
+  conversionGallery: 'Envie até 2 fotos para destacar seu trabalho',
   faq: 'Responda as perguntas que você mais recebe',
   resultsGallery: 'Descreva as imagens/provas que gostaria de incluir',
   premiumVisualStyle: 'Descreva o estilo visual desejado e referências',
@@ -203,6 +212,30 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
           <PlanSelector
             selectedPlan={formData.chosenPlan}
             onSelectPlan={(plan) => updateField('chosenPlan', plan)}
+          />
+        </div>
+      );
+    }
+
+    // Special case: Hosting selector
+    if (field === 'hostingOption') {
+      return (
+        <div key={field} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <HostingSelector
+            selectedOption={formData.hostingOption}
+            onSelectOption={(option) => updateField('hostingOption', option)}
+          />
+        </div>
+      );
+    }
+
+    // Special case: Domain registration
+    if (field === 'domainRegistration') {
+      return (
+        <div key={field} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <DomainRegistrationForm
+            data={formData.domainRegistration || initialDomainRegistration}
+            onChange={(data) => updateField('domainRegistration', data)}
           />
         </div>
       );
@@ -317,7 +350,22 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
       );
     }
 
-    // Special case: Gallery upload
+    // Special case: Conversion gallery (2 photos for conversão plan)
+    if (field === 'conversionGallery') {
+      return (
+        <div key={field} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <GalleryUpload
+            value={formData.conversionGallery}
+            onChange={(value) => updateField('conversionGallery', value)}
+            maxPhotos={2}
+            label="Galeria de fotos"
+            description="Envie até 2 fotos para destacar seu trabalho (opcional)"
+          />
+        </div>
+      );
+    }
+
+    // Special case: Gallery upload (8 photos for autoridade)
     if (field === 'resultsGallery') {
       return (
         <div key={field} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
@@ -325,6 +373,8 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
             value={formData.resultsGallery}
             onChange={(value) => updateField('resultsGallery', value)}
             maxPhotos={8}
+            label="Galeria de resultados"
+            description="Envie fotos de trabalhos, antes/depois, certificados"
           />
         </div>
       );

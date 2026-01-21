@@ -10,9 +10,17 @@ interface GalleryUploadProps {
   value: string; // JSON array of URLs
   onChange: (value: string) => void;
   maxPhotos?: number;
+  label?: string;
+  description?: string;
 }
 
-export function GalleryUpload({ value, onChange, maxPhotos = 8 }: GalleryUploadProps) {
+export function GalleryUpload({ 
+  value, 
+  onChange, 
+  maxPhotos = 8,
+  label = 'Galeria de resultados',
+  description = 'Envie fotos de trabalhos, antes/depois, certificados',
+}: GalleryUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -124,7 +132,7 @@ export function GalleryUpload({ value, onChange, maxPhotos = 8 }: GalleryUploadP
       <div className="flex items-center justify-between">
         <Label className="text-base font-medium flex items-center gap-2">
           <Image className="w-4 h-4 text-primary" />
-          Galeria de resultados
+          {label}
         </Label>
         <span className="text-xs text-muted-foreground">
           {photos.length}/{maxPhotos} fotos
@@ -132,7 +140,7 @@ export function GalleryUpload({ value, onChange, maxPhotos = 8 }: GalleryUploadP
       </div>
       
       <p className="text-sm text-muted-foreground">
-        Envie fotos de trabalhos, antes/depois, certificados
+        {description}
       </p>
 
       {/* Photo grid */}

@@ -1,8 +1,24 @@
 export type PlanType = 'presenca' | 'conversao' | 'autoridade';
+export type HostingOption = 'with' | 'without' | null;
 
 export interface SocialNetwork {
   platform: string;
   url: string;
+}
+
+export interface DomainRegistrationData {
+  fullName: string;
+  cpf: string;
+  email: string;
+  cep: string;
+  address: string;
+  number: string;
+  complement: string;
+  state: string;
+  city: string;
+  ddd: string;
+  phone: string;
+  extension: string;
 }
 
 export interface FormData {
@@ -15,17 +31,22 @@ export interface FormData {
   logoUrl: string | null;
   chosenPlan: PlanType;
   
+  // Hosting option
+  hostingOption: HostingOption;
+  domainRegistration: DomainRegistrationData | null;
+  
   // Presença fields
   professionalSummary: string;
   services: string;
   locationHours: string;
   mainObjective: string;
   
-  // Conversão fields
+  // Conversão fields (includes gallery for up to 2 photos)
   painSolutions: string;
   competitiveDifferentials: string;
   testimonialsSection: string;
   visualProcess: string;
+  conversionGallery: string;
   
   // Autoridade fields
   faq: string;
@@ -33,6 +54,21 @@ export interface FormData {
   premiumVisualStyle: string;
   advancedFooterMap: string;
 }
+
+export const initialDomainRegistration: DomainRegistrationData = {
+  fullName: '',
+  cpf: '',
+  email: '',
+  cep: '',
+  address: '',
+  number: '',
+  complement: '',
+  state: '',
+  city: '',
+  ddd: '',
+  phone: '',
+  extension: '',
+};
 
 export const initialFormData: FormData = {
   businessName: '',
@@ -42,6 +78,8 @@ export const initialFormData: FormData = {
   socialNetworks: [],
   logoUrl: null,
   chosenPlan: 'presenca',
+  hostingOption: null,
+  domainRegistration: null,
   professionalSummary: '',
   services: '',
   locationHours: '',
@@ -50,6 +88,7 @@ export const initialFormData: FormData = {
   competitiveDifferentials: '',
   testimonialsSection: '',
   visualProcess: '',
+  conversionGallery: '',
   faq: '',
   resultsGallery: '',
   premiumVisualStyle: '',
@@ -62,6 +101,7 @@ export interface FormStep {
   description: string;
   fields: (keyof FormData)[];
   plans?: PlanType[];
+  condition?: (formData: FormData) => boolean;
 }
 
 export const formSteps: FormStep[] = [
@@ -90,6 +130,19 @@ export const formSteps: FormStep[] = [
     fields: ['chosenPlan'],
   },
   {
+    id: 'hosting',
+    title: 'Hospedagem e Domínio',
+    description: 'Escolha como deseja hospedar sua página',
+    fields: ['hostingOption'],
+  },
+  {
+    id: 'domainRegistration',
+    title: 'Dados para Registro do Domínio',
+    description: 'Informações necessárias para registrar seu domínio .com.br',
+    fields: ['domainRegistration'],
+    condition: (formData) => formData.hostingOption === 'with',
+  },
+  {
     id: 'professional',
     title: 'Perfil Profissional',
     description: 'Conte sobre você e seus serviços',
@@ -100,7 +153,7 @@ export const formSteps: FormStep[] = [
     id: 'conversion',
     title: 'Estratégia de Conversão',
     description: 'Elementos que transformam visitantes em clientes',
-    fields: ['painSolutions', 'competitiveDifferentials', 'testimonialsSection', 'visualProcess'],
+    fields: ['painSolutions', 'competitiveDifferentials', 'testimonialsSection', 'visualProcess', 'conversionGallery'],
     plans: ['conversao', 'autoridade'],
   },
   {
@@ -131,6 +184,7 @@ export const planInfo = {
       'Diferenciais',
       'Depoimentos',
       'Processo de Atendimento',
+      'Galeria (até 2 fotos)',
     ],
   },
   autoridade: {
