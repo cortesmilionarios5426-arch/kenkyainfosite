@@ -17,13 +17,20 @@ export function MultiStepForm() {
   const [isComplete, setIsComplete] = useState(false);
   const { toast } = useToast();
 
-  // Filter steps based on selected plan
+  // Filter steps based on selected plan and conditions
   const visibleSteps = useMemo(() => {
     return formSteps.filter((step) => {
-      if (!step.plans) return true;
-      return step.plans.includes(formData.chosenPlan);
+      // Check plan-based visibility
+      if (step.plans && !step.plans.includes(formData.chosenPlan)) {
+        return false;
+      }
+      // Check condition-based visibility
+      if (step.condition && !step.condition(formData)) {
+        return false;
+      }
+      return true;
     });
-  }, [formData.chosenPlan]);
+  }, [formData.chosenPlan, formData.hostingOption]);
 
   const currentStep = visibleSteps[currentStepIndex];
   const isFirstStep = currentStepIndex === 0;
