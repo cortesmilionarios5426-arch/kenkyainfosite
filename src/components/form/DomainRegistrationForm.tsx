@@ -43,12 +43,12 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
         <Shield className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
         <div>
           <p className="text-sm text-foreground font-medium mb-1">
-            Por que precisamos desses dados?
+            Seus dados estão protegidos
           </p>
           <p className="text-sm text-muted-foreground">
-            Para registrar um domínio .com.br, é necessário informar os dados do titular. 
-            Essas informações garantem que o domínio seja de sua propriedade legal, 
-            assegurando seus direitos sobre ele. Seus dados são tratados com total sigilo e segurança.
+            Para registrar um domínio .com.br, o Registro.br exige os dados do titular. 
+            Essas informações são obrigatórias para garantir a propriedade legal do domínio em seu nome. 
+            Tratamos seus dados com total sigilo e segurança, seguindo a LGPD.
           </p>
         </div>
       </div>
@@ -57,18 +57,18 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
       <div className="space-y-4">
         <h3 className="text-base font-semibold flex items-center gap-2">
           <Info className="w-4 h-4 text-primary" />
-          Dados Pessoais do Titular
+          Dados do Titular
         </h3>
         
         <div className="grid grid-cols-1 gap-4">
           {/* Full Name */}
           <div className="space-y-2">
-            <Label htmlFor="fullName">Nome completo (pessoa física) *</Label>
+            <Label htmlFor="fullName">Nome completo *</Label>
             <Input
               id="fullName"
               value={data.fullName}
               onChange={(e) => updateField('fullName', e.target.value)}
-              placeholder="EXEMPLO: João da Silva Santos"
+              placeholder="Ex: Maria da Silva Santos"
               className="form-input-animated form-input-tall"
             />
           </div>
@@ -80,7 +80,7 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
               id="cpf"
               value={data.cpf}
               onChange={(e) => updateField('cpf', formatCPF(e.target.value))}
-              placeholder="EXEMPLO: 123.456.789-00"
+              placeholder="Ex: 123.456.789-00"
               className="form-input-animated form-input-tall"
               maxLength={14}
             />
@@ -94,7 +94,7 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
               type="email"
               value={data.email}
               onChange={(e) => updateField('email', e.target.value)}
-              placeholder="EXEMPLO: contato@email.com"
+              placeholder="Ex: contato@email.com.br"
               className="form-input-animated form-input-tall"
             />
           </div>
@@ -113,7 +113,7 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
               id="cep"
               value={data.cep}
               onChange={(e) => updateField('cep', formatCEP(e.target.value))}
-              placeholder="00000-000"
+              placeholder="Ex: 01310-100"
               className="form-input-animated form-input-tall"
               maxLength={9}
             />
@@ -123,12 +123,12 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           {/* Address */}
           <div className="space-y-2 sm:col-span-3">
-            <Label htmlFor="address">Endereço *</Label>
+            <Label htmlFor="address">Logradouro *</Label>
             <Input
               id="address"
               value={data.address}
               onChange={(e) => updateField('address', e.target.value)}
-              placeholder="EXEMPLO: Rua das Flores"
+              placeholder="Ex: Avenida Paulista"
               className="form-input-animated form-input-tall"
             />
           </div>
@@ -140,7 +140,7 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
               id="number"
               value={data.number}
               onChange={(e) => updateField('number', e.target.value)}
-              placeholder="123"
+              placeholder="Ex: 1000"
               className="form-input-animated form-input-tall"
             />
           </div>
@@ -154,7 +154,7 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
               id="complement"
               value={data.complement}
               onChange={(e) => updateField('complement', e.target.value)}
-              placeholder="Apto 101"
+              placeholder="Ex: Sala 101"
               className="form-input-animated form-input-tall"
             />
           </div>
@@ -166,7 +166,7 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
               id="state"
               value={data.state}
               onChange={(e) => updateField('state', e.target.value.toUpperCase().slice(0, 2))}
-              placeholder="SP"
+              placeholder="Ex: SP"
               className="form-input-animated form-input-tall"
               maxLength={2}
             />
@@ -179,7 +179,7 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
               id="city"
               value={data.city}
               onChange={(e) => updateField('city', e.target.value)}
-              placeholder="São Paulo"
+              placeholder="Ex: São Paulo"
               className="form-input-animated form-input-tall"
             />
           </div>
@@ -188,7 +188,7 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
 
       {/* Phone Section */}
       <div className="space-y-4">
-        <h3 className="text-base font-semibold">Telefone</h3>
+        <h3 className="text-base font-semibold">Telefone para Contato</h3>
         
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
           {/* DDD */}
