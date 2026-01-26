@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { LogIn, LogOut, Trash2, Eye, RefreshCw, Users, FileText, Copy, Download, Image } from 'lucide-react';
+import { LogIn, LogOut, Trash2, Eye, RefreshCw, Users, FileText, Copy, Download, Image, Clock, CheckCircle2, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { planInfo } from '@/types/form';
 import { cn } from '@/lib/utils';
 import { BrandingPdfGenerator } from '@/components/admin/BrandingPdfGenerator';
@@ -189,11 +190,45 @@ export default function Admin() {
 
       setResponses((prev) => prev.filter((r) => r.id !== id));
       toast({ title: 'Resposta excluída' });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erro ao excluir',
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('form_responses')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setResponses((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
+      );
+      
+      toast({ title: 'Status atualizado!' });
+    } catch {
+      toast({
+        title: 'Erro ao atualizar status',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return { label: 'Concluído', icon: CheckCircle2, color: 'text-green-400' };
+      case 'in_progress':
+        return { label: 'Em andamento', icon: Loader2, color: 'text-yellow-400' };
+      case 'pending':
+      default:
+        return { label: 'Na fila', icon: Clock, color: 'text-muted-foreground' };
     }
   };
 
@@ -394,44 +429,82 @@ export default function Admin() {
                       <th className="text-left p-3 text-sm font-medium text-muted-foreground">Negócio</th>
                       <th className="text-left p-3 text-sm font-medium text-muted-foreground">Serviço</th>
                       <th className="text-left p-3 text-sm font-medium text-muted-foreground">Plano</th>
+                      <th className="text-left p-3 text-sm font-medium text-muted-foreground">Status</th>
                       <th className="text-left p-3 text-sm font-medium text-muted-foreground">Data</th>
                       <th className="text-right p-3 text-sm font-medium text-muted-foreground">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {responses.map((response) => (
-                      <tr key={response.id} className="border-b border-border/50 hover:bg-muted/20">
-                        <td className="p-3 font-medium">{response.business_name}</td>
-                        <td className="p-3 text-muted-foreground">{response.main_service}</td>
-                        <td className="p-3">
-                          <Badge className={cn('border', getPlanBadgeColor(response.chosen_plan))}>
-                            {planInfo[response.chosen_plan]?.name || response.chosen_plan}
-                          </Badge>
-                        </td>
-                        <td className="p-3 text-muted-foreground text-sm">
-                          {new Date(response.created_at).toLocaleDateString('pt-BR')}
-                        </td>
-                        <td className="p-3 text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => setSelectedResponse(response)}
+                    {responses.map((response) => {
+                      const statusInfo = getStatusInfo(response.status);
+                      const StatusIcon = statusInfo.icon;
+                      return (
+                        <tr key={response.id} className="border-b border-border/50 hover:bg-muted/20">
+                          <td className="p-3 font-medium">{response.business_name}</td>
+                          <td className="p-3 text-muted-foreground">{response.main_service}</td>
+                          <td className="p-3">
+                            <Badge className={cn('border', getPlanBadgeColor(response.chosen_plan))}>
+                              {planInfo[response.chosen_plan]?.name || response.chosen_plan}
+                            </Badge>
+                          </td>
+                          <td className="p-3">
+                            <Select
+                              value={response.status || 'pending'}
+                              onValueChange={(value) => handleStatusChange(response.id, value)}
                             >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => handleDelete(response.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                              <SelectTrigger className="w-[150px] h-8 text-xs">
+                                <div className="flex items-center gap-2">
+                                  <StatusIcon className={cn('w-3.5 h-3.5', statusInfo.color)} />
+                                  <SelectValue />
+                                </div>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">
+                                  <div className="flex items-center gap-2">
+                                    <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                                    Na fila
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="in_progress">
+                                  <div className="flex items-center gap-2">
+                                    <Loader2 className="w-3.5 h-3.5 text-yellow-400" />
+                                    Em andamento
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="completed">
+                                  <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
+                                    Concluído
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </td>
+                          <td className="p-3 text-muted-foreground text-sm">
+                            {new Date(response.created_at).toLocaleDateString('pt-BR')}
+                          </td>
+                          <td className="p-3 text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setSelectedResponse(response)}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => handleDelete(response.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
