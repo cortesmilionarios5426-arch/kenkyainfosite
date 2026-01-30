@@ -628,44 +628,44 @@ export default function Admin() {
                     {selectedResponse.hosting_option === 'with' && selectedResponse.domain_registration && (
                       <div className="mt-4 space-y-4">
                         <h4 className="font-semibold text-primary">Dados para Registro do Domínio</h4>
-                        <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
-                          <div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
+                          <div className="min-w-0">
                             <p className="text-sm text-muted-foreground">Nome Completo</p>
-                            <p className="font-medium">{selectedResponse.domain_registration.fullName || '-'}</p>
+                            <p className="font-medium break-words">{selectedResponse.domain_registration.fullName || '-'}</p>
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-sm text-muted-foreground">CPF</p>
-                            <p className="font-medium">{selectedResponse.domain_registration.cpf || '-'}</p>
+                            <p className="font-medium break-words">{selectedResponse.domain_registration.cpf || '-'}</p>
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-sm text-muted-foreground">Email</p>
-                            <p className="font-medium">{selectedResponse.domain_registration.email || '-'}</p>
+                            <p className="font-medium break-all">{selectedResponse.domain_registration.email || '-'}</p>
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-sm text-muted-foreground">Telefone</p>
-                            <p className="font-medium">
+                            <p className="font-medium break-words">
                               {selectedResponse.domain_registration.ddd ? `(${selectedResponse.domain_registration.ddd}) ` : ''}
                               {selectedResponse.domain_registration.phone || '-'}
                               {selectedResponse.domain_registration.extension ? ` R. ${selectedResponse.domain_registration.extension}` : ''}
                             </p>
                           </div>
-                          <div className="col-span-2">
+                          <div className="col-span-1 sm:col-span-2 min-w-0">
                             <p className="text-sm text-muted-foreground">Endereço</p>
-                            <p className="font-medium">
+                            <p className="font-medium break-words">
                               {selectedResponse.domain_registration.address || '-'}
                               {selectedResponse.domain_registration.number ? `, ${selectedResponse.domain_registration.number}` : ''}
                               {selectedResponse.domain_registration.complement ? ` - ${selectedResponse.domain_registration.complement}` : ''}
                             </p>
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-sm text-muted-foreground">Cidade/Estado</p>
-                            <p className="font-medium">
+                            <p className="font-medium break-words">
                               {selectedResponse.domain_registration.city || '-'} / {selectedResponse.domain_registration.state || '-'}
                             </p>
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-sm text-muted-foreground">CEP</p>
-                            <p className="font-medium">{selectedResponse.domain_registration.cep || '-'}</p>
+                            <p className="font-medium break-words">{selectedResponse.domain_registration.cep || '-'}</p>
                           </div>
                         </div>
                       </div>
@@ -674,72 +674,72 @@ export default function Admin() {
                   
                   <TabsContent value="content" className="space-y-4 mt-4">
                     {selectedResponse.professional_summary && (
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-muted-foreground mb-1">Resumo Profissional</p>
-                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.professional_summary}</pre>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto">{selectedResponse.professional_summary}</div>
                       </div>
                     )}
                     {selectedResponse.services && (
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-muted-foreground mb-1">Serviços</p>
-                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.services}</pre>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto">{selectedResponse.services}</div>
                       </div>
                     )}
                     {selectedResponse.location_hours && (
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-muted-foreground mb-1">Local e Horário</p>
-                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.location_hours}</pre>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto">{selectedResponse.location_hours}</div>
                       </div>
                     )}
                     {selectedResponse.main_objective && (
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-muted-foreground mb-1">Objetivo Principal</p>
-                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.main_objective}</pre>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto">{selectedResponse.main_objective}</div>
                       </div>
                     )}
                     {selectedResponse.testimonials_section && (
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-muted-foreground mb-1">Depoimentos</p>
-                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{formatTestimonials(selectedResponse.testimonials_section)}</pre>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto">{formatTestimonials(selectedResponse.testimonials_section)}</div>
                       </div>
                     )}
                   </TabsContent>
                   
                   <TabsContent value="advanced" className="space-y-4 mt-4">
                     {selectedResponse.pain_solutions && (
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-muted-foreground mb-1">Dores & Soluções</p>
-                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.pain_solutions}</pre>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto">{selectedResponse.pain_solutions}</div>
                       </div>
                     )}
                     {selectedResponse.competitive_differentials && (
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-muted-foreground mb-1">Diferenciais</p>
-                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.competitive_differentials}</pre>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto">{selectedResponse.competitive_differentials}</div>
                       </div>
                     )}
                     {selectedResponse.visual_process && (
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-muted-foreground mb-1">Processo de Atendimento</p>
-                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.visual_process}</pre>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto">{selectedResponse.visual_process}</div>
                       </div>
                     )}
                     {selectedResponse.faq && (
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-muted-foreground mb-1">FAQ</p>
-                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.faq}</pre>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto">{selectedResponse.faq}</div>
                       </div>
                     )}
                     {selectedResponse.premium_visual_style && (
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-muted-foreground mb-1">Estilo Visual</p>
-                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.premium_visual_style}</pre>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto">{selectedResponse.premium_visual_style}</div>
                       </div>
                     )}
                     {selectedResponse.advanced_footer_map && (
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-muted-foreground mb-1">Endereço</p>
-                        <pre className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap font-sans">{selectedResponse.advanced_footer_map}</pre>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto">{selectedResponse.advanced_footer_map}</div>
                       </div>
                     )}
                   </TabsContent>
