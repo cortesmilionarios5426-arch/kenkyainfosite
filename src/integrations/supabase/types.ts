@@ -21,8 +21,11 @@ export type Database = {
           business_name: string
           chosen_plan: Database["public"]["Enums"]["plan_type"]
           competitive_differentials: string | null
+          conversion_gallery: string | null
           created_at: string
+          domain_registration: Json | null
           faq: string | null
+          hosting_option: string | null
           id: string
           location_hours: string | null
           logo_url: string | null
@@ -46,8 +49,11 @@ export type Database = {
           business_name: string
           chosen_plan: Database["public"]["Enums"]["plan_type"]
           competitive_differentials?: string | null
+          conversion_gallery?: string | null
           created_at?: string
+          domain_registration?: Json | null
           faq?: string | null
+          hosting_option?: string | null
           id?: string
           location_hours?: string | null
           logo_url?: string | null
@@ -71,8 +77,11 @@ export type Database = {
           business_name?: string
           chosen_plan?: Database["public"]["Enums"]["plan_type"]
           competitive_differentials?: string | null
+          conversion_gallery?: string | null
           created_at?: string
+          domain_registration?: Json | null
           faq?: string | null
+          hosting_option?: string | null
           id?: string
           location_hours?: string | null
           logo_url?: string | null
