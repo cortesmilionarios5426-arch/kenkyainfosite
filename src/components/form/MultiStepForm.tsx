@@ -140,15 +140,23 @@ export function MultiStepForm() {
   }
 
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen py-10 px-4 relative overflow-hidden">
+      {/* Decorative orbs */}
+      <div className="orb orb-primary" />
+      <div className="orb orb-accent" />
+
+      <div className="max-w-3xl mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2 text-foreground">
+        <div className="text-center mb-10 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-sm font-medium text-primary">Kenkya Sites</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground leading-tight">
             Briefing para sua <span className="gradient-text">Landing Page</span>
           </h1>
-          <p className="text-muted-foreground text-sm md:text-base">
-            Preencha as informações abaixo para que possamos criar sua página profissional
+          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
+            Preencha as informações abaixo para criarmos sua página profissional
           </p>
         </div>
 
@@ -168,14 +176,14 @@ export function MultiStepForm() {
           />
 
           {/* Navigation */}
-          <div className="flex justify-between items-center mt-10 pt-6 border-t border-border/50">
+          <div className="flex justify-between items-center mt-12 pt-8 border-t border-border/30">
             <Button
               type="button"
               variant="ghost"
               onClick={goToPreviousStep}
               disabled={isFirstStep}
               className={cn(
-                'transition-all duration-300',
+                'transition-all duration-300 hover:bg-muted/50',
                 isFirstStep && 'opacity-0 pointer-events-none'
               )}
             >
@@ -183,8 +191,16 @@ export function MultiStepForm() {
               Voltar
             </Button>
 
-            <div className="text-sm text-muted-foreground font-medium">
-              {currentStepIndex + 1} / {visibleSteps.length}
+            <div className="flex items-center gap-2">
+              {visibleSteps.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    'w-2 h-2 rounded-full transition-all duration-300',
+                    idx === currentStepIndex ? 'w-6 bg-primary' : idx < currentStepIndex ? 'bg-primary/50' : 'bg-muted'
+                  )}
+                />
+              ))}
             </div>
 
             {isLastStep ? (
@@ -192,14 +208,14 @@ export function MultiStepForm() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+                className="btn-gradient px-6"
               >
                 {isSubmitting ? (
                   'Enviando...'
                 ) : (
                   <>
                     Enviar
-                    <Send className="w-4 h-4 ml-1" />
+                    <Send className="w-4 h-4 ml-2" />
                   </>
                 )}
               </Button>
@@ -207,7 +223,7 @@ export function MultiStepForm() {
               <Button
                 type="button"
                 onClick={goToNextStep}
-                className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+                className="btn-gradient px-6"
               >
                 Próximo
                 <ChevronRight className="w-4 h-4 ml-1" />
@@ -217,8 +233,10 @@ export function MultiStepForm() {
         </FormCard>
         
         {/* Footer branding */}
-        <div className="text-center mt-6 text-xs text-muted-foreground/60">
-          Powered by Kenkya
+        <div className="text-center mt-8">
+          <p className="text-xs text-muted-foreground/40 font-medium tracking-wider uppercase">
+            Powered by Kenkya
+          </p>
         </div>
       </div>
     </div>
