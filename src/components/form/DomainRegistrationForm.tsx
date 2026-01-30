@@ -1,14 +1,31 @@
+import { useState, useCallback } from 'react';
 import { DomainRegistrationData } from '@/types/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Info } from 'lucide-react';
+import { Shield, Info, Loader2, CheckCircle2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface DomainRegistrationFormProps {
   data: DomainRegistrationData;
   onChange: (data: DomainRegistrationData) => void;
 }
 
+interface ViaCEPResponse {
+  cep: string;
+  logradouro: string;
+  complemento: string;
+  bairro: string;
+  localidade: string;
+  uf: string;
+  erro?: boolean;
+}
+
 export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFormProps) {
+  const [isLoadingCEP, setIsLoadingCEP] = useState(false);
+  const [cepFound, setCepFound] = useState(false);
+  const { toast } = useToast();
+
   const updateField = (field: keyof DomainRegistrationData, value: string) => {
     onChange({ ...data, [field]: value });
   };
@@ -34,6 +51,73 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
     if (numbers.length <= 4) return numbers;
     if (numbers.length <= 8) return numbers.replace(/(\d{4})(\d)/, '$1-$2');
     return numbers.replace(/(\d{5})(\d)/, '$1-$2');
+  };
+
+  // Fetch address from ViaCEP
+  const fetchAddressByCEP = useCallback(async (cep: string) => {
+    const cleanCEP = cep.replace(/\D/g, '');
+    
+    if (cleanCEP.length !== 8) {
+      setCepFound(false);
+      return;
+    }
+
+    setIsLoadingCEP(true);
+    setCepFound(false);
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
+      const result: ViaCEPResponse = await response.json();
+
+      if (result.erro) {
+        toast({
+          title: 'CEP não encontrado',
+          description: 'Verifique o CEP digitado e tente novamente.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Update form with address data
+      onChange({
+        ...data,
+        cep: formatCEP(cleanCEP),
+        address: result.logradouro || data.address,
+        city: result.localidade || data.city,
+        state: result.uf || data.state,
+        complement: result.complemento || data.complement,
+      });
+
+      setCepFound(true);
+      
+      toast({
+        title: 'Endereço encontrado!',
+        description: `${result.logradouro}, ${result.localidade} - ${result.uf}`,
+      });
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+      toast({
+        title: 'Erro ao buscar CEP',
+        description: 'Não foi possível consultar o endereço. Digite manualmente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingCEP(false);
+    }
+  }, [data, onChange, toast]);
+
+  // Handle CEP change
+  const handleCEPChange = (value: string) => {
+    const formatted = formatCEP(value);
+    updateField('cep', formatted);
+    
+    // Auto-fetch when CEP is complete (8 digits)
+    const cleanCEP = value.replace(/\D/g, '');
+    if (cleanCEP.length === 8) {
+      fetchAddressByCEP(cleanCEP);
+    } else {
+      setCepFound(false);
+    }
   };
 
   return (
@@ -109,14 +193,30 @@ export function DomainRegistrationForm({ data, onChange }: DomainRegistrationFor
           {/* CEP */}
           <div className="space-y-2">
             <Label htmlFor="cep">CEP *</Label>
-            <Input
-              id="cep"
-              value={data.cep}
-              onChange={(e) => updateField('cep', formatCEP(e.target.value))}
-              placeholder="Ex: 01310-100"
-              className="form-input-animated form-input-tall"
-              maxLength={9}
-            />
+            <div className="relative">
+              <Input
+                id="cep"
+                value={data.cep}
+                onChange={(e) => handleCEPChange(e.target.value)}
+                placeholder="Ex: 01310-100"
+                className={cn(
+                  "form-input-animated form-input-tall pr-10",
+                  cepFound && "border-green-500 focus-visible:ring-green-500"
+                )}
+                maxLength={9}
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {isLoadingCEP && (
+                  <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                )}
+                {cepFound && !isLoadingCEP && (
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Digite o CEP para preencher o endereço automaticamente
+            </p>
           </div>
         </div>
 
