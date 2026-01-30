@@ -23,6 +23,8 @@ interface FormResponse {
   social_networks: any;
   logo_url: string | null;
   chosen_plan: 'presenca' | 'conversao' | 'autoridade';
+  hosting_option: string | null;
+  domain_registration: any | null;
   professional_summary: string | null;
   services: string | null;
   location_hours: string | null;
@@ -31,6 +33,7 @@ interface FormResponse {
   competitive_differentials: string | null;
   testimonials_section: string | null;
   visual_process: string | null;
+  conversion_gallery: string | null;
   faq: string | null;
   results_gallery: string | null;
   premium_visual_style: string | null;
@@ -556,8 +559,9 @@ export default function Admin() {
                 </div>
 
                 <Tabs defaultValue="basic" className="mt-2">
-                  <TabsList className="grid grid-cols-4 w-full">
+                  <TabsList className="grid grid-cols-5 w-full">
                     <TabsTrigger value="basic">Básico</TabsTrigger>
+                    <TabsTrigger value="hosting">Hospedagem</TabsTrigger>
                     <TabsTrigger value="content">Conteúdo</TabsTrigger>
                     <TabsTrigger value="advanced">Avançado</TabsTrigger>
                     <TabsTrigger value="gallery">Galeria</TabsTrigger>
@@ -609,6 +613,63 @@ export default function Admin() {
                         </div>
                       )}
                     </div>
+                  </TabsContent>
+
+                  <TabsContent value="hosting" className="space-y-4 mt-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Opção de Hospedagem</p>
+                        <Badge className="mt-1" variant={selectedResponse.hosting_option === 'with' ? 'default' : 'secondary'}>
+                          {selectedResponse.hosting_option === 'with' ? 'Com Domínio (.com.br)' : 'Sem Hospedagem'}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    {selectedResponse.hosting_option === 'with' && selectedResponse.domain_registration && (
+                      <div className="mt-4 space-y-4">
+                        <h4 className="font-semibold text-primary">Dados para Registro do Domínio</h4>
+                        <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Nome Completo</p>
+                            <p className="font-medium">{selectedResponse.domain_registration.fullName || '-'}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">CPF</p>
+                            <p className="font-medium">{selectedResponse.domain_registration.cpf || '-'}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Email</p>
+                            <p className="font-medium">{selectedResponse.domain_registration.email || '-'}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Telefone</p>
+                            <p className="font-medium">
+                              {selectedResponse.domain_registration.ddd ? `(${selectedResponse.domain_registration.ddd}) ` : ''}
+                              {selectedResponse.domain_registration.phone || '-'}
+                              {selectedResponse.domain_registration.extension ? ` R. ${selectedResponse.domain_registration.extension}` : ''}
+                            </p>
+                          </div>
+                          <div className="col-span-2">
+                            <p className="text-sm text-muted-foreground">Endereço</p>
+                            <p className="font-medium">
+                              {selectedResponse.domain_registration.address || '-'}
+                              {selectedResponse.domain_registration.number ? `, ${selectedResponse.domain_registration.number}` : ''}
+                              {selectedResponse.domain_registration.complement ? ` - ${selectedResponse.domain_registration.complement}` : ''}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Cidade/Estado</p>
+                            <p className="font-medium">
+                              {selectedResponse.domain_registration.city || '-'} / {selectedResponse.domain_registration.state || '-'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">CEP</p>
+                            <p className="font-medium">{selectedResponse.domain_registration.cep || '-'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </TabsContent>
                   
                   <TabsContent value="content" className="space-y-4 mt-4">
@@ -683,33 +744,83 @@ export default function Admin() {
                     )}
                   </TabsContent>
                   
-                  <TabsContent value="gallery" className="mt-4">
+                  <TabsContent value="gallery" className="mt-4 space-y-6">
+                    {/* Logo */}
+                    {selectedResponse.logo_url && (
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <Image className="w-4 h-4" />
+                          Logo
+                        </h4>
+                        <div className="flex items-center gap-4">
+                          <img src={selectedResponse.logo_url} alt="Logo" className="w-24 h-24 object-contain rounded-lg border border-border" />
+                          <Button size="sm" variant="outline" onClick={() => downloadSingleImage(selectedResponse.logo_url!, `${selectedResponse.business_name}_logo`)}>
+                            <Download className="w-4 h-4 mr-2" />
+                            Baixar Logo
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Galeria Conversão (2 fotos) */}
                     {(() => {
-                      const photos = getGalleryPhotos(selectedResponse.results_gallery);
-                      if (photos.length === 0) {
-                        return (
-                          <div className="text-center py-12 text-muted-foreground">
-                            <Image className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                            <p>Nenhuma foto enviada</p>
-                          </div>
-                        );
-                      }
+                      const conversionPhotos = getGalleryPhotos(selectedResponse.conversion_gallery);
+                      if (conversionPhotos.length === 0) return null;
                       return (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          {photos.map((url, index) => (
-                            <a
-                              key={index}
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="aspect-square rounded-xl overflow-hidden border-2 border-border hover:border-primary transition-colors"
-                            >
-                              <img src={url} alt={`Foto ${index + 1}`} className="w-full h-full object-cover" />
-                            </a>
-                          ))}
+                        <div>
+                          <h4 className="font-semibold mb-3 flex items-center gap-2">
+                            <Image className="w-4 h-4" />
+                            Galeria Conversão ({conversionPhotos.length} fotos)
+                            <Button size="sm" variant="outline" className="ml-auto" onClick={() => downloadGalleryPhotos(conversionPhotos, selectedResponse.business_name, 'conversao')}>
+                              <Download className="w-4 h-4 mr-2" />
+                              Baixar todas
+                            </Button>
+                          </h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {conversionPhotos.map((url, index) => (
+                              <a key={index} href={url} target="_blank" rel="noopener noreferrer" className="aspect-square rounded-xl overflow-hidden border-2 border-border hover:border-primary transition-colors">
+                                <img src={url} alt={`Foto ${index + 1}`} className="w-full h-full object-cover" />
+                              </a>
+                            ))}
+                          </div>
                         </div>
                       );
                     })()}
+
+                    {/* Galeria Autoridade (8 fotos) */}
+                    {(() => {
+                      const photos = getGalleryPhotos(selectedResponse.results_gallery);
+                      if (photos.length === 0) return null;
+                      return (
+                        <div>
+                          <h4 className="font-semibold mb-3 flex items-center gap-2">
+                            <Image className="w-4 h-4" />
+                            Galeria Autoridade ({photos.length} fotos)
+                            <Button size="sm" variant="outline" className="ml-auto" onClick={() => downloadGalleryPhotos(photos, selectedResponse.business_name, 'autoridade')}>
+                              <Download className="w-4 h-4 mr-2" />
+                              Baixar todas
+                            </Button>
+                          </h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {photos.map((url, index) => (
+                              <a key={index} href={url} target="_blank" rel="noopener noreferrer" className="aspect-square rounded-xl overflow-hidden border-2 border-border hover:border-primary transition-colors">
+                                <img src={url} alt={`Foto ${index + 1}`} className="w-full h-full object-cover" />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Empty state */}
+                    {!selectedResponse.logo_url && 
+                     getGalleryPhotos(selectedResponse.conversion_gallery).length === 0 && 
+                     getGalleryPhotos(selectedResponse.results_gallery).length === 0 && (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Image className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>Nenhuma imagem enviada</p>
+                      </div>
+                    )}
                   </TabsContent>
                 </Tabs>
               </>
@@ -729,9 +840,23 @@ export default function Admin() {
     sections.push(`Plano: ${planInfo[response.chosen_plan]?.name}`);
     sections.push(`WhatsApp: ${response.whatsapp_number}`);
     sections.push(`Cores: ${response.business_colors}`);
+    sections.push(`Hospedagem: ${response.hosting_option === 'with' ? 'Com Domínio (.com.br)' : 'Sem Hospedagem'}`);
     
     if (response.logo_url) {
       sections.push(`\nLogo: ${response.logo_url}`);
+    }
+
+    // Domain registration data
+    if (response.hosting_option === 'with' && response.domain_registration) {
+      const d = response.domain_registration;
+      sections.push(`\n--- DADOS PARA REGISTRO DO DOMÍNIO ---`);
+      sections.push(`Nome Completo: ${d.fullName || '-'}`);
+      sections.push(`CPF: ${d.cpf || '-'}`);
+      sections.push(`Email: ${d.email || '-'}`);
+      sections.push(`Telefone: ${d.ddd ? `(${d.ddd}) ` : ''}${d.phone || '-'}${d.extension ? ` R. ${d.extension}` : ''}`);
+      sections.push(`Endereço: ${d.address || '-'}${d.number ? `, ${d.number}` : ''}${d.complement ? ` - ${d.complement}` : ''}`);
+      sections.push(`Cidade/Estado: ${d.city || '-'} / ${d.state || '-'}`);
+      sections.push(`CEP: ${d.cep || '-'}`);
     }
     
     if (Array.isArray(response.social_networks) && response.social_networks.length > 0) {
@@ -785,9 +910,17 @@ export default function Admin() {
       sections.push(`\n--- ENDEREÇO ---\n${response.advanced_footer_map}`);
     }
     
+    const conversionPhotos = getGalleryPhotos(response.conversion_gallery);
+    if (conversionPhotos.length > 0) {
+      sections.push(`\n--- GALERIA CONVERSÃO (${conversionPhotos.length} fotos) ---`);
+      conversionPhotos.forEach((url, i) => {
+        sections.push(`Foto ${i + 1}: ${url}`);
+      });
+    }
+
     const photos = getGalleryPhotos(response.results_gallery);
     if (photos.length > 0) {
-      sections.push(`\n--- GALERIA (${photos.length} fotos) ---`);
+      sections.push(`\n--- GALERIA AUTORIDADE (${photos.length} fotos) ---`);
       photos.forEach((url, i) => {
         sections.push(`Foto ${i + 1}: ${url}`);
       });
@@ -835,6 +968,52 @@ export default function Admin() {
         document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
         // Small delay between downloads
+        await new Promise(resolve => setTimeout(resolve, 300));
+      } catch (error) {
+        console.error('Download error:', error);
+      }
+    }
+    
+    toast({ title: `${photos.length} fotos baixadas!` });
+  }
+
+  async function downloadSingleImage(url: string, filename: string) {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const ext = url.split('.').pop()?.split('?')[0] || 'jpg';
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${filename.replace(/\s+/g, '_')}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+      toast({ title: 'Download iniciado!' });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({ title: 'Erro no download', variant: 'destructive' });
+    }
+  }
+
+  async function downloadGalleryPhotos(photos: string[], businessName: string, galleryType: string) {
+    if (photos.length === 0) return;
+
+    toast({ title: 'Iniciando downloads...' });
+
+    for (let i = 0; i < photos.length; i++) {
+      const url = photos[i];
+      try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const ext = url.split('.').pop()?.split('?')[0] || 'jpg';
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${businessName.replace(/\s+/g, '_')}_${galleryType}_${i + 1}.${ext}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
         await new Promise(resolve => setTimeout(resolve, 300));
       } catch (error) {
         console.error('Download error:', error);
