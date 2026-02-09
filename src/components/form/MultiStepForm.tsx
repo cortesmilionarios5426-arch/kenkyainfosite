@@ -83,6 +83,7 @@ export function MultiStepForm() {
           main_service: acctFormData.mainService,
           business_colors: acctFormData.businessColors,
           whatsapp_number: acctFormData.whatsappNumber,
+          acct_landline_number: acctFormData.landlineNumber || null,
           social_networks: acctFormData.socialNetworks as any,
           logo_url: acctFormData.logoUrl,
           chosen_plan: 'presenca' as const,
@@ -192,12 +193,12 @@ export function MultiStepForm() {
             <span className="text-sm font-medium text-primary">Kenkya Sites</span>
           </div>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground leading-tight">
-            Briefing para sua <span className="gradient-text">Landing Page</span>
+            Briefing para sua <span className="gradient-text">Página Profissional</span>
           </h1>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
             {isAccounting
-              ? 'Preencha as informações do seu escritório de contabilidade'
-              : 'Preencha as informações abaixo para criarmos sua página profissional'}
+              ? 'Preencha as informações do seu escritório para criarmos sua página estratégica'
+              : 'Preencha as informações abaixo para criarmos sua página sob medida'}
           </p>
           <button
             onClick={handleReset}

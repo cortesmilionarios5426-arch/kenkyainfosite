@@ -198,6 +198,8 @@ export function AccountingFormStepContent({ step, formData, updateField }: Accou
           <WhatsAppMultiInput
             value={formData.whatsappNumber}
             onChange={(val) => updateField('whatsappNumber', val)}
+            landlineValue={formData.landlineNumber}
+            onLandlineChange={(val) => updateField('landlineNumber', val)}
           />
         </div>
       );

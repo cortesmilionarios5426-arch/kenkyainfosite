@@ -25,6 +25,7 @@ export type Database = {
           acct_has_script: string | null
           acct_hosting_mode: string | null
           acct_ideal_client: string | null
+          acct_landline_number: string | null
           acct_main_objection: string | null
           acct_main_service: string | null
           acct_monthly_clients: string | null
@@ -72,6 +73,7 @@ export type Database = {
           acct_has_script?: string | null
           acct_hosting_mode?: string | null
           acct_ideal_client?: string | null
+          acct_landline_number?: string | null
           acct_main_objection?: string | null
           acct_main_service?: string | null
           acct_monthly_clients?: string | null
@@ -119,6 +121,7 @@ export type Database = {
           acct_has_script?: string | null
           acct_hosting_mode?: string | null
           acct_ideal_client?: string | null
+          acct_landline_number?: string | null
           acct_main_objection?: string | null
           acct_main_service?: string | null
           acct_monthly_clients?: string | null

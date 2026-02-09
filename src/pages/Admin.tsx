@@ -25,7 +25,11 @@ interface FormResponse {
   logo_url: string | null;
   chosen_plan: 'presenca' | 'conversao' | 'autoridade';
   hosting_option: string | null;
+  domain_option_1: string | null;
+  domain_option_2: string | null;
   domain_registration: any | null;
+  acct_hosting_mode: string | null;
+  acct_landline_number: string | null;
   professional_summary: string | null;
   services: string | null;
   location_hours: string | null;
@@ -600,7 +604,28 @@ export default function Admin() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-muted-foreground">WhatsApp</p>
-                        <p className="font-medium">{selectedResponse.whatsapp_number}</p>
+                        {(() => {
+                          try {
+                            const parsed = JSON.parse(selectedResponse.whatsapp_number);
+                            if (Array.isArray(parsed)) {
+                              return (
+                                <div className="space-y-1 mt-1">
+                                  {parsed.map((entry: any, i: number) => (
+                                    <p key={i} className="font-medium text-sm">
+                                      {entry.sector ? <span className="text-primary">{entry.sector}:</span> : null} {entry.number}
+                                    </p>
+                                  ))}
+                                </div>
+                              );
+                            }
+                          } catch { /* not JSON */ }
+                          return <p className="font-medium">{selectedResponse.whatsapp_number}</p>;
+                        })()}
+                        {selectedResponse.acct_landline_number && (
+                          <p className="font-medium text-sm mt-1">
+                            <span className="text-muted-foreground">Fixo:</span> {selectedResponse.acct_landline_number}
+                          </p>
+                        )}
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Cores</p>
@@ -646,15 +671,35 @@ export default function Admin() {
 
                   <TabsContent value="hosting" className="space-y-4 mt-4">
                     <div className="grid grid-cols-2 gap-4">
+                      {selectedResponse.domain_option_1 && (
+                        <div>
+                          <p className="text-sm text-muted-foreground">1ª opção de domínio</p>
+                          <p className="font-medium font-mono">{selectedResponse.domain_option_1}</p>
+                        </div>
+                      )}
+                      {selectedResponse.domain_option_2 && (
+                        <div>
+                          <p className="text-sm text-muted-foreground">2ª opção de domínio</p>
+                          <p className="font-medium font-mono">{selectedResponse.domain_option_2}</p>
+                        </div>
+                      )}
                       <div>
-                        <p className="text-sm text-muted-foreground">Opção de Hospedagem</p>
-                        <Badge className="mt-1" variant={selectedResponse.hosting_option === 'with' ? 'default' : 'secondary'}>
-                          {selectedResponse.hosting_option === 'with' ? 'Com Domínio (.com.br)' : 'Sem Hospedagem'}
+                        <p className="text-sm text-muted-foreground">Modo de Configuração</p>
+                        <Badge className="mt-1" variant={selectedResponse.acct_hosting_mode === 'full_config' ? 'default' : 'secondary'}>
+                          {selectedResponse.acct_hosting_mode === 'full_config'
+                            ? 'Configuração completa por nós'
+                            : selectedResponse.acct_hosting_mode === 'tech_responsible'
+                              ? 'Responsável técnico'
+                              : selectedResponse.hosting_option === 'with'
+                                ? 'Com Domínio (.com.br)'
+                                : selectedResponse.hosting_option === 'without'
+                                  ? 'Sem Hospedagem'
+                                  : 'Não definido'}
                         </Badge>
                       </div>
                     </div>
                     
-                    {selectedResponse.hosting_option === 'with' && selectedResponse.domain_registration && (
+                    {(selectedResponse.hosting_option === 'with' || selectedResponse.acct_hosting_mode === 'full_config') && selectedResponse.domain_registration && (
                       <div className="mt-4 space-y-4">
                         <h4 className="font-semibold text-primary">Dados para Registro do Domínio</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
@@ -971,16 +1016,41 @@ export default function Admin() {
     sections.push(`Tipo: ${response.business_type === 'accounting' ? 'Contabilidade' : 'Profissional Liberal'}`);
     sections.push(`Serviço: ${response.main_service}`);
     sections.push(`Plano: ${planInfo[response.chosen_plan]?.name}`);
-    sections.push(`WhatsApp: ${response.whatsapp_number}`);
+    
+    // WhatsApp - parse JSON or plain text
+    try {
+      const parsed = JSON.parse(response.whatsapp_number);
+      if (Array.isArray(parsed)) {
+        parsed.forEach((entry: any) => {
+          sections.push(`WhatsApp${entry.sector ? ` (${entry.sector})` : ''}: ${entry.number}`);
+        });
+      } else {
+        sections.push(`WhatsApp: ${response.whatsapp_number}`);
+      }
+    } catch {
+      sections.push(`WhatsApp: ${response.whatsapp_number}`);
+    }
+    if (response.acct_landline_number) {
+      sections.push(`Telefone Fixo: ${response.acct_landline_number}`);
+    }
+    
     sections.push(`Cores: ${response.business_colors}`);
-    sections.push(`Hospedagem: ${response.hosting_option === 'with' ? 'Com Domínio (.com.br)' : 'Sem Hospedagem'}`);
+    
+    if (response.domain_option_1) sections.push(`Domínio 1ª opção: ${response.domain_option_1}`);
+    if (response.domain_option_2) sections.push(`Domínio 2ª opção: ${response.domain_option_2}`);
+    
+    if (response.acct_hosting_mode) {
+      sections.push(`Modo configuração: ${response.acct_hosting_mode === 'full_config' ? 'Configuração completa por nós' : 'Responsável técnico'}`);
+    } else {
+      sections.push(`Hospedagem: ${response.hosting_option === 'with' ? 'Com Domínio (.com.br)' : 'Sem Hospedagem'}`);
+    }
     
     if (response.logo_url) {
       sections.push(`\nLogo: ${response.logo_url}`);
     }
 
     // Domain registration data
-    if (response.hosting_option === 'with' && response.domain_registration) {
+    if ((response.hosting_option === 'with' || response.acct_hosting_mode === 'full_config') && response.domain_registration) {
       const d = response.domain_registration;
       sections.push(`\n--- DADOS PARA REGISTRO DO DOMÍNIO ---`);
       sections.push(`Nome Completo: ${d.fullName || '-'}`);
