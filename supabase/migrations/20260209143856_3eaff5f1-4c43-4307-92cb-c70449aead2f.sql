@@ -1,0 +1,1 @@
+ALTER TABLE public.form_responses ADD COLUMN acct_landline_number text;

@@ -8,6 +8,7 @@ export interface AccountingFormData {
   mainService: string;
   businessColors: string;
   whatsappNumber: string; // JSON array of {sector, number} for accounting
+  landlineNumber: string; // optional landline
   socialNetworks: { platform: string; url: string }[];
   logoUrl: string | null;
   chosenPlan: 'presenca' | 'conversao' | 'autoridade';
@@ -48,6 +49,7 @@ export const initialAccountingFormData: AccountingFormData = {
   mainService: '',
   businessColors: '',
   whatsappNumber: '',
+  landlineNumber: '',
   socialNetworks: [],
   logoUrl: null,
   chosenPlan: 'presenca',

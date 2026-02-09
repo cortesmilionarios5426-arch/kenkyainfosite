@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Plus, X, Phone, Building2 } from 'lucide-react';
+import { Plus, X, Phone, Building2, PhoneCall } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface WhatsAppEntry {
@@ -13,6 +13,8 @@ export interface WhatsAppEntry {
 interface WhatsAppMultiInputProps {
   value: string;
   onChange: (value: string) => void;
+  landlineValue?: string;
+  onLandlineChange?: (value: string) => void;
 }
 
 const parseEntries = (value: string): WhatsAppEntry[] => {
@@ -21,14 +23,14 @@ const parseEntries = (value: string): WhatsAppEntry[] => {
     const parsed = JSON.parse(value);
     if (Array.isArray(parsed) && parsed.length > 0) return parsed;
   } catch {
-    // Legacy single number format
     if (value.trim()) return [{ sector: 'Principal', number: value.trim() }];
   }
   return [{ sector: '', number: '' }];
 };
 
-export function WhatsAppMultiInput({ value, onChange }: WhatsAppMultiInputProps) {
+export function WhatsAppMultiInput({ value, onChange, landlineValue, onLandlineChange }: WhatsAppMultiInputProps) {
   const [entries, setEntries] = useState<WhatsAppEntry[]>(parseEntries(value));
+  const [showLandline, setShowLandline] = useState(!!landlineValue);
 
   const updateEntries = (newEntries: WhatsAppEntry[]) => {
     setEntries(newEntries);
@@ -62,10 +64,10 @@ export function WhatsAppMultiInput({ value, onChange }: WhatsAppMultiInputProps)
     <div className="space-y-4">
       <Label className="text-base font-medium flex items-center gap-2">
         <Phone className="w-4 h-4 text-primary" />
-        WhatsApp do escritório
+        Telefones do escritório
       </Label>
       <p className="text-sm text-muted-foreground">
-        Adicione os números de WhatsApp do escritório. Se tiver mais de um setor, identifique cada um.
+        Adicione os números de WhatsApp. Se tiver mais de um setor, identifique cada um.
       </p>
 
       <div className="space-y-3">
@@ -112,21 +114,61 @@ export function WhatsAppMultiInput({ value, onChange }: WhatsAppMultiInputProps)
         ))}
       </div>
 
-      {entries.length < 5 && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={addEntry}
-          className="flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Adicionar outro WhatsApp
-        </Button>
+      <div className="flex flex-wrap gap-2">
+        {entries.length < 5 && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addEntry}
+            className="flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Adicionar outro WhatsApp
+          </Button>
+        )}
+
+        {onLandlineChange && !showLandline && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowLandline(true)}
+            className="flex items-center gap-2"
+          >
+            <PhoneCall className="w-4 h-4" />
+            Adicionar telefone fixo
+          </Button>
+        )}
+      </div>
+
+      {/* Telefone fixo */}
+      {showLandline && onLandlineChange && (
+        <div className="flex items-start gap-3 p-4 rounded-xl border border-border/40 bg-card/30 animate-slide-up">
+          <div className="flex-1 space-y-2">
+            <Label className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+              <PhoneCall className="w-4 h-4" />
+              Telefone fixo (opcional)
+            </Label>
+            <Input
+              value={landlineValue || ''}
+              onChange={(e) => onLandlineChange(e.target.value)}
+              placeholder="EXEMPLO: (11) 3456-7890"
+              className="form-input-animated h-9 text-sm"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => { setShowLandline(false); onLandlineChange(''); }}
+            className="mt-6 w-7 h-7 rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 transition-colors flex-shrink-0"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
       )}
 
       <p className="text-xs text-muted-foreground">
-        {entries.length}/5 números • Identifique o setor para facilitar o direcionamento
+        {entries.length}/5 WhatsApp • Identifique o setor para facilitar o direcionamento
       </p>
     </div>
   );
