@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Palette, Plus, X, Sparkles } from 'lucide-react';
+import { Palette, Plus, X, Sparkles, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ColorSelectorProps {
@@ -12,77 +12,137 @@ interface ColorSelectorProps {
 
 interface SelectedColor {
   hex: string;
-  name: string;
+}
+
+// Get dominant colors using k-means-like sampling
+function extractDominantColors(imageData: ImageData, count: number): string[] {
+  const pixels: number[][] = [];
+  const data = imageData.data;
+
+  // Sample every 4th pixel for performance
+  for (let i = 0; i < data.length; i += 16) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    const a = data[i + 3];
+
+    // Skip transparent/near-white/near-black pixels
+    if (a < 128) continue;
+    const brightness = (r + g + b) / 3;
+    if (brightness > 245 || brightness < 10) continue;
+
+    pixels.push([r, g, b]);
+  }
+
+  if (pixels.length === 0) return [];
+
+  // Simple color bucketing
+  const buckets = new Map<string, { sum: number[]; count: number }>();
+
+  pixels.forEach(([r, g, b]) => {
+    // Round to nearest 32 to create buckets
+    const key = `${Math.round(r / 32) * 32},${Math.round(g / 32) * 32},${Math.round(b / 32) * 32}`;
+    const existing = buckets.get(key);
+    if (existing) {
+      existing.sum[0] += r;
+      existing.sum[1] += g;
+      existing.sum[2] += b;
+      existing.count++;
+    } else {
+      buckets.set(key, { sum: [r, g, b], count: 1 });
+    }
+  });
+
+  // Sort by frequency and pick top colors
+  const sorted = [...buckets.values()]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, count);
+
+  return sorted.map(({ sum, count: c }) => {
+    const r = Math.round(sum[0] / c);
+    const g = Math.round(sum[1] / c);
+    const b = Math.round(sum[2] / c);
+    return `#${[r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')}`;
+  });
 }
 
 export function ColorSelector({ value, onChange, logoUrl }: ColorSelectorProps) {
   const [colorMode, setColorMode] = useState<'extract' | 'manual'>('manual');
   const [selectedColors, setSelectedColors] = useState<SelectedColor[]>([]);
-  const [extractedColors, setExtractedColors] = useState<string[]>([]);
+  const [isExtracting, setIsExtracting] = useState(false);
   const colorInputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null]);
 
-  // Parse existing colors on mount
+  // Parse existing colors on mount only
   useEffect(() => {
     if (value) {
       const colors = value.split(',').map(c => c.trim()).filter(Boolean);
-      const parsed = colors.map(c => ({ hex: c, name: c }));
-      setSelectedColors(parsed.slice(0, 3));
+      setSelectedColors(colors.slice(0, 3).map(hex => ({ hex })));
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Extract colors from logo (simple extraction simulation)
-  const extractColorsFromLogo = async () => {
+  const syncToForm = useCallback((colors: SelectedColor[]) => {
+    onChange(colors.map(c => c.hex).join(', '));
+  }, [onChange]);
+
+  // Extract colors from logo with better algorithm
+  const extractColorsFromLogo = useCallback(async () => {
     if (!logoUrl) return;
-    
-    // Create canvas to extract colors
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
 
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+    setIsExtracting(true);
 
-      // Sample colors from different parts of the image
-      const colors: string[] = [];
-      const samplePoints = [
-        { x: img.width / 4, y: img.height / 4 },
-        { x: img.width / 2, y: img.height / 2 },
-        { x: (img.width * 3) / 4, y: (img.height * 3) / 4 },
-      ];
+    try {
+      const img = new window.Image();
+      img.crossOrigin = 'anonymous';
 
-      samplePoints.forEach(point => {
-        const data = ctx.getImageData(point.x, point.y, 1, 1).data;
-        const hex = `#${[data[0], data[1], data[2]].map(x => x.toString(16).padStart(2, '0')).join('')}`;
-        if (!colors.includes(hex)) colors.push(hex);
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) { reject('No canvas context'); return; }
+
+          // Scale down for performance
+          const maxSize = 150;
+          const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+          canvas.width = Math.floor(img.width * scale);
+          canvas.height = Math.floor(img.height * scale);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const colors = extractDominantColors(imageData, 3);
+
+          if (colors.length > 0) {
+            const newColors = colors.map(hex => ({ hex }));
+            setSelectedColors(newColors);
+            syncToForm(newColors);
+          }
+          resolve();
+        };
+        img.onerror = () => reject('Failed to load image');
+        img.src = logoUrl;
       });
-
-      setExtractedColors(colors);
-      const newColors = colors.map(hex => ({ hex, name: hex }));
-      setSelectedColors(newColors);
-      onChange(colors.join(', '));
-    };
-    img.src = logoUrl;
-  };
+    } catch (err) {
+      console.error('Erro ao extrair cores:', err);
+    } finally {
+      setIsExtracting(false);
+    }
+  }, [logoUrl, syncToForm]);
 
   const addColor = (hex: string, index: number) => {
     const newColors = [...selectedColors];
     if (index < newColors.length) {
-      newColors[index] = { hex, name: hex };
+      newColors[index] = { hex };
     } else {
-      newColors.push({ hex, name: hex });
+      newColors.push({ hex });
     }
-    setSelectedColors(newColors.slice(0, 3));
-    onChange(newColors.slice(0, 3).map(c => c.hex).join(', '));
+    const sliced = newColors.slice(0, 3);
+    setSelectedColors(sliced);
+    syncToForm(sliced);
   };
 
   const removeColor = (index: number) => {
     const newColors = selectedColors.filter((_, i) => i !== index);
     setSelectedColors(newColors);
-    onChange(newColors.map(c => c.hex).join(', '));
+    syncToForm(newColors);
   };
 
   const openColorPicker = (index: number) => {
@@ -111,22 +171,24 @@ export function ColorSelector({ value, onChange, logoUrl }: ColorSelectorProps) 
           <Palette className="w-4 h-4" />
           <span>Escolher cores</span>
         </Button>
-        
+
         <Button
           type="button"
           variant={colorMode === 'extract' ? 'default' : 'outline'}
           size="sm"
           onClick={() => {
             setColorMode('extract');
-            if (logoUrl) {
-              extractColorsFromLogo();
-            }
+            if (logoUrl) extractColorsFromLogo();
           }}
-          disabled={!logoUrl}
+          disabled={!logoUrl || isExtracting}
           className="flex items-center gap-2"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>Extrair da logo</span>
+          {isExtracting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Sparkles className="w-4 h-4" />
+          )}
+          <span>{isExtracting ? 'Extraindo...' : 'Extrair da logo'}</span>
         </Button>
       </div>
 
@@ -139,69 +201,77 @@ export function ColorSelector({ value, onChange, logoUrl }: ColorSelectorProps) 
 
       {/* Color display and picker */}
       <div className="flex flex-wrap items-center gap-3">
-        {/* Selected colors */}
-        {selectedColors.map((color, index) => (
-          <div key={index} className="relative group">
-            <button
-              type="button"
-              onClick={() => openColorPicker(index)}
-              className="w-12 h-12 rounded-xl border-2 border-border shadow-md transition-all duration-200 hover:scale-110 hover:shadow-lg"
-              style={{ backgroundColor: color.hex }}
-              title={`Clique para editar: ${color.hex}`}
-            />
-            <button
-              type="button"
-              onClick={() => removeColor(index)}
-              className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <X className="w-3 h-3" />
-            </button>
-            <input
-              ref={el => colorInputRefs.current[index] = el}
-              type="color"
-              value={color.hex}
-              onChange={(e) => addColor(e.target.value, index)}
-              className="sr-only"
-            />
-          </div>
-        ))}
+        {/* Existing color slots */}
+        {[0, 1, 2].map((index) => {
+          const color = selectedColors[index];
 
-        {/* Add color button - always show if less than 3 colors (manual or extract) */}
-        {selectedColors.length < 3 && (
-          <button
-            type="button"
-            onClick={() => openColorPicker(selectedColors.length)}
-            className={cn(
-              'w-12 h-12 rounded-xl border-2 border-dashed border-border',
-              'flex items-center justify-center transition-all duration-200',
-              'hover:border-primary hover:bg-primary/5 hover:scale-105'
-            )}
-            title="Adicionar cor"
-          >
-            <Plus className="w-5 h-5 text-muted-foreground" />
-            <input
-              ref={el => colorInputRefs.current[selectedColors.length] = el}
-              type="color"
-              defaultValue="#6366f1"
-              onChange={(e) => addColor(e.target.value, selectedColors.length)}
-              className="sr-only"
-            />
-          </button>
-        )}
+          if (color) {
+            return (
+              <div key={index} className="relative group">
+                <button
+                  type="button"
+                  onClick={() => openColorPicker(index)}
+                  className="w-14 h-14 rounded-xl border-2 border-border shadow-md transition-all duration-200 hover:scale-110 hover:shadow-lg cursor-pointer"
+                  style={{ backgroundColor: color.hex }}
+                  title={`Clique para editar: ${color.hex}`}
+                />
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); removeColor(index); }}
+                  className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                <input
+                  ref={el => { colorInputRefs.current[index] = el; }}
+                  type="color"
+                  value={color.hex}
+                  onChange={(e) => addColor(e.target.value, index)}
+                  className="sr-only"
+                />
+                <span className="block text-center text-[10px] text-muted-foreground mt-1 font-mono">
+                  {color.hex}
+                </span>
+              </div>
+            );
+          }
+
+          // Empty slot = add button
+          return (
+            <div key={index} className="flex flex-col items-center">
+              <button
+                type="button"
+                onClick={() => openColorPicker(index)}
+                className={cn(
+                  'w-14 h-14 rounded-xl border-2 border-dashed border-border',
+                  'flex items-center justify-center transition-all duration-200',
+                  'hover:border-primary hover:bg-primary/5 hover:scale-105'
+                )}
+                title="Adicionar cor"
+              >
+                <Plus className="w-5 h-5 text-muted-foreground" />
+              </button>
+              <input
+                ref={el => { colorInputRefs.current[index] = el; }}
+                type="color"
+                defaultValue={['#6366f1', '#ec4899', '#10b981'][index]}
+                onChange={(e) => addColor(e.target.value, index)}
+                className="sr-only"
+              />
+              <span className="text-[10px] text-muted-foreground mt-1">
+                Cor {index + 1}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Help text */}
-      {selectedColors.length === 0 && colorMode === 'manual' && (
-        <p className="text-xs text-muted-foreground">
-          Clique em "+" para adicionar uma cor
-        </p>
-      )}
-      
-      {selectedColors.length > 0 && (
-        <p className="text-xs text-muted-foreground">
-          {selectedColors.length}/3 cores • Clique na cor para editar, ou no X para remover
-        </p>
-      )}
+      {/* Status text */}
+      <p className="text-xs text-muted-foreground">
+        {selectedColors.length === 0
+          ? 'Clique nos slots acima para adicionar suas cores'
+          : `${selectedColors.length}/3 cores selecionadas • Clique na cor para editar, ou no X para remover`}
+      </p>
     </div>
   );
 }

@@ -3,11 +3,11 @@ export type BusinessType = 'professional' | 'accounting';
 export type AcctHostingMode = 'full_config' | 'tech_responsible' | null;
 
 export interface AccountingFormData {
-  // Basic info (shared)
+  // Basic info
   businessName: string;
   mainService: string;
   businessColors: string;
-  whatsappNumber: string;
+  whatsappNumber: string; // JSON array of {sector, number} for accounting
   socialNetworks: { platform: string; url: string }[];
   logoUrl: string | null;
   chosenPlan: 'presenca' | 'conversao' | 'autoridade';
