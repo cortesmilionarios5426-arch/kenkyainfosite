@@ -16,9 +16,25 @@ export type Database = {
     Tables: {
       form_responses: {
         Row: {
+          acct_avg_ticket: string | null
+          acct_certifications: string | null
+          acct_client_volume_preference: string | null
+          acct_closing_time: string | null
+          acct_companies_served: string | null
+          acct_differentials: string | null
+          acct_has_script: string | null
+          acct_ideal_client: string | null
+          acct_main_objection: string | null
+          acct_main_service: string | null
+          acct_monthly_clients: string | null
+          acct_niches_served: string | null
+          acct_service_area: string | null
+          acct_who_answers: string | null
+          acct_years_in_market: string | null
           advanced_footer_map: string | null
           business_colors: string
           business_name: string
+          business_type: string
           chosen_plan: Database["public"]["Enums"]["plan_type"]
           competitive_differentials: string | null
           conversion_gallery: string | null
@@ -44,9 +60,25 @@ export type Database = {
           whatsapp_number: string
         }
         Insert: {
+          acct_avg_ticket?: string | null
+          acct_certifications?: string | null
+          acct_client_volume_preference?: string | null
+          acct_closing_time?: string | null
+          acct_companies_served?: string | null
+          acct_differentials?: string | null
+          acct_has_script?: string | null
+          acct_ideal_client?: string | null
+          acct_main_objection?: string | null
+          acct_main_service?: string | null
+          acct_monthly_clients?: string | null
+          acct_niches_served?: string | null
+          acct_service_area?: string | null
+          acct_who_answers?: string | null
+          acct_years_in_market?: string | null
           advanced_footer_map?: string | null
           business_colors: string
           business_name: string
+          business_type?: string
           chosen_plan: Database["public"]["Enums"]["plan_type"]
           competitive_differentials?: string | null
           conversion_gallery?: string | null
@@ -72,9 +104,25 @@ export type Database = {
           whatsapp_number: string
         }
         Update: {
+          acct_avg_ticket?: string | null
+          acct_certifications?: string | null
+          acct_client_volume_preference?: string | null
+          acct_closing_time?: string | null
+          acct_companies_served?: string | null
+          acct_differentials?: string | null
+          acct_has_script?: string | null
+          acct_ideal_client?: string | null
+          acct_main_objection?: string | null
+          acct_main_service?: string | null
+          acct_monthly_clients?: string | null
+          acct_niches_served?: string | null
+          acct_service_area?: string | null
+          acct_who_answers?: string | null
+          acct_years_in_market?: string | null
           advanced_footer_map?: string | null
           business_colors?: string
           business_name?: string
+          business_type?: string
           chosen_plan?: Database["public"]["Enums"]["plan_type"]
           competitive_differentials?: string | null
           conversion_gallery?: string | null
