@@ -16,6 +16,7 @@ import { BrandingPdfGenerator } from '@/components/admin/BrandingPdfGenerator';
 
 interface FormResponse {
   id: string;
+  business_type: string;
   business_name: string;
   main_service: string;
   business_colors: string;
@@ -38,6 +39,22 @@ interface FormResponse {
   results_gallery: string | null;
   premium_visual_style: string | null;
   advanced_footer_map: string | null;
+  // Accounting fields
+  acct_main_service: string | null;
+  acct_service_area: string | null;
+  acct_monthly_clients: string | null;
+  acct_ideal_client: string | null;
+  acct_avg_ticket: string | null;
+  acct_client_volume_preference: string | null;
+  acct_who_answers: string | null;
+  acct_has_script: string | null;
+  acct_main_objection: string | null;
+  acct_closing_time: string | null;
+  acct_years_in_market: string | null;
+  acct_companies_served: string | null;
+  acct_niches_served: string | null;
+  acct_certifications: string | null;
+  acct_differentials: string | null;
   status: string;
   created_at: string;
 }
@@ -429,6 +446,7 @@ export default function Admin() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border">
+                      <th className="text-left p-3 text-sm font-medium text-muted-foreground">Tipo</th>
                       <th className="text-left p-3 text-sm font-medium text-muted-foreground">Negócio</th>
                       <th className="text-left p-3 text-sm font-medium text-muted-foreground">Serviço</th>
                       <th className="text-left p-3 text-sm font-medium text-muted-foreground">Plano</th>
@@ -443,6 +461,11 @@ export default function Admin() {
                       const StatusIcon = statusInfo.icon;
                       return (
                         <tr key={response.id} className="border-b border-border/50 hover:bg-muted/20">
+                          <td className="p-3">
+                            <Badge variant="outline" className="text-xs">
+                              {response.business_type === 'accounting' ? '🧮 Contabilidade' : '👤 Profissional'}
+                            </Badge>
+                          </td>
                           <td className="p-3 font-medium">{response.business_name}</td>
                           <td className="p-3 text-muted-foreground">{response.main_service}</td>
                           <td className="p-3">
@@ -559,11 +582,17 @@ export default function Admin() {
                 </div>
 
                 <Tabs defaultValue="basic" className="mt-2">
-                  <TabsList className="grid grid-cols-5 w-full">
+                  <TabsList className={cn("grid w-full", selectedResponse.business_type === 'accounting' ? 'grid-cols-6' : 'grid-cols-5')}>
                     <TabsTrigger value="basic">Básico</TabsTrigger>
                     <TabsTrigger value="hosting">Hospedagem</TabsTrigger>
-                    <TabsTrigger value="content">Conteúdo</TabsTrigger>
-                    <TabsTrigger value="advanced">Avançado</TabsTrigger>
+                    {selectedResponse.business_type === 'accounting' ? (
+                      <TabsTrigger value="accounting">Contabilidade</TabsTrigger>
+                    ) : (
+                      <>
+                        <TabsTrigger value="content">Conteúdo</TabsTrigger>
+                        <TabsTrigger value="advanced">Avançado</TabsTrigger>
+                      </>
+                    )}
                     <TabsTrigger value="gallery">Galeria</TabsTrigger>
                   </TabsList>
                   
@@ -743,6 +772,109 @@ export default function Admin() {
                       </div>
                     )}
                   </TabsContent>
+
+                  {/* Accounting tab */}
+                  <TabsContent value="accounting" className="space-y-4 mt-4">
+                    <h4 className="font-semibold text-primary">Posicionamento e Captação</h4>
+                    {selectedResponse.acct_main_service && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Serviço foco</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.acct_main_service}</div>
+                      </div>
+                    )}
+                    {selectedResponse.acct_service_area && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Área de atendimento</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.acct_service_area}</div>
+                      </div>
+                    )}
+                    {selectedResponse.acct_monthly_clients && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Novos clientes/mês</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.acct_monthly_clients}</div>
+                      </div>
+                    )}
+
+                    <h4 className="font-semibold text-primary pt-2">Perfil do Cliente Ideal</h4>
+                    {selectedResponse.acct_ideal_client && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Cliente ideal</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap">{selectedResponse.acct_ideal_client}</div>
+                      </div>
+                    )}
+                    {selectedResponse.acct_avg_ticket && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Ticket médio</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.acct_avg_ticket}</div>
+                      </div>
+                    )}
+                    {selectedResponse.acct_client_volume_preference && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Volume vs porte</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.acct_client_volume_preference}</div>
+                      </div>
+                    )}
+
+                    <h4 className="font-semibold text-primary pt-2">Estratégia Comercial</h4>
+                    {selectedResponse.acct_who_answers && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Quem atende</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.acct_who_answers}</div>
+                      </div>
+                    )}
+                    {selectedResponse.acct_has_script && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Roteiro comercial</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.acct_has_script}</div>
+                      </div>
+                    )}
+                    {selectedResponse.acct_main_objection && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Principal objeção</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap">{selectedResponse.acct_main_objection}</div>
+                      </div>
+                    )}
+                    {selectedResponse.acct_closing_time && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Tempo para fechar</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.acct_closing_time}</div>
+                      </div>
+                    )}
+
+                    <h4 className="font-semibold text-primary pt-2">Prova e Autoridade</h4>
+                    {selectedResponse.acct_years_in_market && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Anos de mercado</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.acct_years_in_market}</div>
+                      </div>
+                    )}
+                    {selectedResponse.acct_companies_served && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Empresas atendidas</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg">{selectedResponse.acct_companies_served}</div>
+                      </div>
+                    )}
+                    {selectedResponse.acct_niches_served && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Nichos</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap">{selectedResponse.acct_niches_served}</div>
+                      </div>
+                    )}
+                    {selectedResponse.acct_certifications && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Certificações</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap">{selectedResponse.acct_certifications}</div>
+                      </div>
+                    )}
+
+                    <h4 className="font-semibold text-primary pt-2">Diferencial Real</h4>
+                    {selectedResponse.acct_differentials && (
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground mb-1">Diferencial</p>
+                        <div className="text-sm bg-muted/30 p-3 rounded-lg whitespace-pre-wrap">{selectedResponse.acct_differentials}</div>
+                      </div>
+                    )}
+                  </TabsContent>
                   
                   <TabsContent value="gallery" className="mt-4 space-y-6">
                     {/* Logo */}
@@ -836,6 +968,7 @@ export default function Admin() {
     const sections: string[] = [];
     
     sections.push(`=== ${response.business_name.toUpperCase()} ===`);
+    sections.push(`Tipo: ${response.business_type === 'accounting' ? 'Contabilidade' : 'Profissional Liberal'}`);
     sections.push(`Serviço: ${response.main_service}`);
     sections.push(`Plano: ${planInfo[response.chosen_plan]?.name}`);
     sections.push(`WhatsApp: ${response.whatsapp_number}`);
@@ -924,6 +1057,26 @@ export default function Admin() {
       photos.forEach((url, i) => {
         sections.push(`Foto ${i + 1}: ${url}`);
       });
+    }
+
+    // Accounting fields
+    if (response.business_type === 'accounting') {
+      sections.push(`\n--- CONTABILIDADE ---`);
+      if (response.acct_main_service) sections.push(`Serviço foco: ${response.acct_main_service}`);
+      if (response.acct_service_area) sections.push(`Área: ${response.acct_service_area}`);
+      if (response.acct_monthly_clients) sections.push(`Clientes/mês: ${response.acct_monthly_clients}`);
+      if (response.acct_ideal_client) sections.push(`Cliente ideal: ${response.acct_ideal_client}`);
+      if (response.acct_avg_ticket) sections.push(`Ticket médio: ${response.acct_avg_ticket}`);
+      if (response.acct_client_volume_preference) sections.push(`Volume/porte: ${response.acct_client_volume_preference}`);
+      if (response.acct_who_answers) sections.push(`Quem atende: ${response.acct_who_answers}`);
+      if (response.acct_has_script) sections.push(`Roteiro: ${response.acct_has_script}`);
+      if (response.acct_main_objection) sections.push(`Objeção: ${response.acct_main_objection}`);
+      if (response.acct_closing_time) sections.push(`Tempo fechamento: ${response.acct_closing_time}`);
+      if (response.acct_years_in_market) sections.push(`Anos: ${response.acct_years_in_market}`);
+      if (response.acct_companies_served) sections.push(`Empresas: ${response.acct_companies_served}`);
+      if (response.acct_niches_served) sections.push(`Nichos: ${response.acct_niches_served}`);
+      if (response.acct_certifications) sections.push(`Certificações: ${response.acct_certifications}`);
+      if (response.acct_differentials) sections.push(`Diferencial: ${response.acct_differentials}`);
     }
     
     return sections.join('\n');
