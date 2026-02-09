@@ -7,6 +7,7 @@ import { SocialNetworkInput } from './SocialNetworkInput';
 import { ColorSelector } from './ColorSelector';
 import { AccountingHostingSelector } from './AccountingHostingSelector';
 import { DomainRegistrationForm } from './DomainRegistrationForm';
+import { WhatsAppMultiInput } from './WhatsAppMultiInput';
 import { Image, X, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRef, useState } from 'react';
@@ -21,9 +22,9 @@ interface AccountingFormStepContentProps {
 
 const fieldLabels: Partial<Record<keyof AccountingFormData, string>> = {
   businessName: 'Nome do escritório',
-  mainService: 'Principal serviço do escritório',
+  mainService: 'Slogan ou frase de posicionamento',
   businessColors: 'Cores do seu negócio',
-  whatsappNumber: 'Número do WhatsApp',
+  whatsappNumber: 'WhatsApp do escritório',
   socialNetworks: 'Redes sociais',
   logoUrl: 'Logo da sua marca',
   domainOption1: '1ª opção de domínio',
@@ -35,62 +36,62 @@ const fieldLabels: Partial<Record<keyof AccountingFormData, string>> = {
   acctMonthlyClients: 'Novos clientes por mês (média)',
   acctIdealClient: 'Quem é o cliente ideal?',
   acctAvgTicket: 'Ticket médio de honorário mensal',
-  acctClientVolumePreference: 'Volume ou clientes de maior porte?',
-  acctWhoAnswers: 'Quem atende o WhatsApp?',
+  acctClientVolumePreference: 'Prefere volume ou ticket alto?',
+  acctWhoAnswers: 'Quem atende os leads?',
   acctHasScript: 'Tem roteiro comercial?',
-  acctMainObjection: 'Principal objeção que recebe',
-  acctClosingTime: 'Tempo para fechar um novo cliente',
-  acctYearsInMarket: 'Anos de mercado',
-  acctCompaniesServed: 'Nº aproximado de empresas atendidas',
-  acctNichesServed: 'Nichos que já atende',
-  acctCertifications: 'Diferenciais técnicos (CRC, especializações)',
-  acctDifferentials: 'Por que uma empresa escolheria você?',
+  acctMainObjection: 'Principal objeção dos clientes',
+  acctClosingTime: 'Tempo médio para fechar',
+  acctYearsInMarket: 'Tempo de mercado',
+  acctCompaniesServed: 'Empresas atendidas',
+  acctNichesServed: 'Nichos de atuação',
+  acctCertifications: 'Certificações e diferenciais técnicos',
+  acctDifferentials: 'Seu diferencial real',
 };
 
 const fieldPlaceholders: Partial<Record<keyof AccountingFormData, string>> = {
   businessName: 'EXEMPLO: Contabilidade Silva & Associados',
-  mainService: 'EXEMPLO: Abertura de empresas e gestão contábil',
-  domainOption1: 'EXEMPLO: suacontabilidade.com.br',
-  domainOption2: 'EXEMPLO: contabilidadesilva.com.br',
+  mainService: 'EXEMPLO: Contabilidade estratégica para quem quer crescer com segurança',
+  domainOption1: 'EXEMPLO: contabilidadesilva.com.br',
+  domainOption2: 'EXEMPLO: silvacontabil.com.br',
   acctMainService: '',
   acctServiceArea: 'EXEMPLO: São Paulo capital e região metropolitana',
   acctMonthlyClients: 'EXEMPLO: 5 a 10 novos clientes',
-  acctIdealClient: 'EXEMPLO: Empresas do Simples Nacional com faturamento até R$ 300k/mês',
+  acctIdealClient: 'EXEMPLO: Prestadores de serviço com faturamento de R$30k a R$300k/mês que precisam de planejamento tributário',
   acctAvgTicket: 'EXEMPLO: R$ 800 a R$ 1.500',
-  acctClientVolumePreference: 'EXEMPLO: Prefiro clientes de maior porte com ticket mais alto',
-  acctWhoAnswers: 'EXEMPLO: Eu mesmo ou minha secretária',
-  acctHasScript: 'EXEMPLO: Sim, tenho um roteiro básico / Não, atendo no improviso',
-  acctMainObjection: 'EXEMPLO: Preço alto em relação à concorrência',
+  acctClientVolumePreference: '',
+  acctWhoAnswers: 'EXEMPLO: Eu mesmo / Secretária / Equipe comercial',
+  acctHasScript: '',
+  acctMainObjection: 'EXEMPLO: "Já tenho contador" ou "Está caro"',
   acctClosingTime: 'EXEMPLO: Em média 3 a 7 dias',
   acctYearsInMarket: 'EXEMPLO: 12 anos',
-  acctCompaniesServed: 'EXEMPLO: Mais de 200 empresas',
-  acctNichesServed: 'EXEMPLO: Médicos, advogados, e-commerce',
-  acctCertifications: 'EXEMPLO: CRC ativo, MBA em Gestão Tributária',
-  acctDifferentials: 'EXEMPLO: Atendimento humanizado, reuniões mensais de resultado, dashboard online para o cliente',
+  acctCompaniesServed: 'EXEMPLO: Mais de 200 empresas ativas',
+  acctNichesServed: 'EXEMPLO: Médicos, advogados, e-commerce, startups',
+  acctCertifications: 'EXEMPLO: CRC ativo, MBA em Gestão Tributária, Especialização em IRPF',
+  acctDifferentials: 'EXEMPLO: Atendimento humanizado com reuniões mensais, dashboard online, resposta em até 2h no WhatsApp',
 };
 
 const fieldDescriptions: Partial<Record<keyof AccountingFormData, string>> = {
-  businessName: 'Este nome aparecerá em destaque na sua página',
-  mainService: 'O serviço pelo qual seu escritório quer ser conhecido',
+  businessName: 'Nome que aparecerá em destaque na sua página',
+  mainService: 'Uma frase curta que resume o que você faz e para quem',
   businessColors: 'Usaremos para personalizar o design da sua página',
-  whatsappNumber: 'Incluiremos botões de WhatsApp na página',
+  whatsappNumber: 'Adicione os números por setor (Comercial, Financeiro, etc.)',
   domainOption1: 'Sua primeira opção de domínio .com.br',
-  domainOption2: 'Caso a primeira não esteja disponível',
-  acctMainService: 'Escolha o serviço foco da sua campanha de captação',
-  acctServiceArea: 'Você atende apenas sua cidade ou todo Brasil?',
-  acctMonthlyClients: 'Nos ajuda a definir a intensidade da estratégia',
-  acctIdealClient: 'Descreva o perfil que você mais quer atrair',
+  domainOption2: 'Opção alternativa caso a primeira não esteja disponível',
+  acctMainService: 'Escolha os serviços foco da sua captação — isso muda toda a copy',
+  acctServiceArea: 'Atendimento local, regional ou nacional?',
+  acctMonthlyClients: 'Nos ajuda a calibrar a intensidade da estratégia',
+  acctIdealClient: 'Quanto mais específico, melhor posicionamos sua página',
   acctAvgTicket: 'Nos ajuda a posicionar sua oferta corretamente',
-  acctClientVolumePreference: 'Isso define a estratégia de precificação na página',
-  acctWhoAnswers: 'Influencia o tom e velocidade do funil',
-  acctHasScript: 'Caso não tenha, podemos sugerir melhorias no fluxo',
-  acctMainObjection: 'Vamos endereçar isso diretamente na página',
-  acctClosingTime: 'Ajuda a calibrar o tipo de CTA e urgência',
-  acctYearsInMarket: 'Contabilidade vende confiança — anos importam',
-  acctCompaniesServed: 'Prova social essencial para gerar credibilidade',
-  acctNichesServed: 'Especialização em nichos gera autoridade',
-  acctCertifications: 'Certificações reforçam credibilidade técnica',
-  acctDifferentials: 'A resposta mais importante: por que você e não um mais barato?',
+  acctClientVolumePreference: 'Isso define se priorizamos volume ou qualificação',
+  acctWhoAnswers: 'Influencia o tom da comunicação e o tipo de CTA',
+  acctHasScript: 'Se não tem, podemos sugerir melhorias no fluxo de atendimento',
+  acctMainObjection: 'Vamos endereçar essa objeção diretamente na página',
+  acctClosingTime: 'Ajuda a calibrar urgência e follow-up na página',
+  acctYearsInMarket: 'Contabilidade vende confiança — experiência é prova social',
+  acctCompaniesServed: 'Número concreto que gera credibilidade imediata',
+  acctNichesServed: 'Especialização em nichos posiciona você como autoridade',
+  acctCertifications: 'CRC, especializações e certificações reforçam a confiança técnica',
+  acctDifferentials: 'A resposta mais importante: por que você e não um contador mais barato?',
 };
 
 const acctMainServiceOptions = [
@@ -190,6 +191,18 @@ export function AccountingFormStepContent({ step, formData, updateField }: Accou
       );
     }
 
+    // WhatsApp multi-input for accounting
+    if (field === 'whatsappNumber') {
+      return (
+        <div key={field} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <WhatsAppMultiInput
+            value={formData.whatsappNumber}
+            onChange={(val) => updateField('whatsappNumber', val)}
+          />
+        </div>
+      );
+    }
+
     // Social networks
     if (field === 'socialNetworks') {
       return (
@@ -277,6 +290,67 @@ export function AccountingFormStepContent({ step, formData, updateField }: Accou
                 )}
               >
                 {option}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Volume preference selector
+    if (field === 'acctClientVolumePreference') {
+      const volumeOptions = [
+        { id: 'volume', label: 'Prefiro volume', desc: 'Mais clientes, ticket menor' },
+        { id: 'quality', label: 'Prefiro ticket alto', desc: 'Menos clientes, maior porte' },
+        { id: 'balanced', label: 'Equilíbrio', desc: 'Mix entre volume e qualidade' },
+      ];
+      return (
+        <div key={field} className="space-y-3 animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <Label className="text-base font-medium">{label}</Label>
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {volumeOptions.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => updateField('acctClientVolumePreference', opt.label)}
+                className={cn(
+                  'px-4 py-4 rounded-xl text-sm font-medium text-center transition-all duration-200 border',
+                  formData.acctClientVolumePreference === opt.label
+                    ? 'bg-primary/20 border-primary/50 text-primary'
+                    : 'bg-card/30 border-border/30 text-muted-foreground hover:border-primary/30'
+                )}
+              >
+                <span className="block font-semibold">{opt.label}</span>
+                <span className="block text-xs mt-1 opacity-70">{opt.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Has script selector
+    if (field === 'acctHasScript') {
+      const scriptOptions = ['Sim, tenho roteiro', 'Não, atendo no improviso', 'Tenho mas precisa melhorar'];
+      return (
+        <div key={field} className="space-y-3 animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <Label className="text-base font-medium">{label}</Label>
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {scriptOptions.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => updateField('acctHasScript', opt)}
+                className={cn(
+                  'px-4 py-3 rounded-xl text-sm font-medium text-center transition-all duration-200 border',
+                  formData.acctHasScript === opt
+                    ? 'bg-primary/20 border-primary/50 text-primary'
+                    : 'bg-card/30 border-border/30 text-muted-foreground hover:border-primary/30'
+                )}
+              >
+                {opt}
               </button>
             ))}
           </div>
