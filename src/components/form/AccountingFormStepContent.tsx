@@ -3,12 +3,11 @@ import { initialDomainRegistration } from '@/types/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { PlanSelector } from './PlanSelector';
 import { SocialNetworkInput } from './SocialNetworkInput';
 import { ColorSelector } from './ColorSelector';
-import { HostingSelector } from './HostingSelector';
+import { AccountingHostingSelector } from './AccountingHostingSelector';
 import { DomainRegistrationForm } from './DomainRegistrationForm';
-import { Image, X } from 'lucide-react';
+import { Image, X, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,8 +26,9 @@ const fieldLabels: Partial<Record<keyof AccountingFormData, string>> = {
   whatsappNumber: 'Número do WhatsApp',
   socialNetworks: 'Redes sociais',
   logoUrl: 'Logo da sua marca',
-  chosenPlan: 'Plano escolhido',
-  hostingOption: 'Opção de hospedagem',
+  domainOption1: '1ª opção de domínio',
+  domainOption2: '2ª opção de domínio',
+  acctHostingMode: 'Modo de configuração',
   domainRegistration: 'Dados para registro',
   acctMainService: 'Qual serviço você mais quer vender?',
   acctServiceArea: 'Área de atendimento',
@@ -50,6 +50,8 @@ const fieldLabels: Partial<Record<keyof AccountingFormData, string>> = {
 const fieldPlaceholders: Partial<Record<keyof AccountingFormData, string>> = {
   businessName: 'EXEMPLO: Contabilidade Silva & Associados',
   mainService: 'EXEMPLO: Abertura de empresas e gestão contábil',
+  domainOption1: 'EXEMPLO: suacontabilidade.com.br',
+  domainOption2: 'EXEMPLO: contabilidadesilva.com.br',
   acctMainService: '',
   acctServiceArea: 'EXEMPLO: São Paulo capital e região metropolitana',
   acctMonthlyClients: 'EXEMPLO: 5 a 10 novos clientes',
@@ -72,6 +74,8 @@ const fieldDescriptions: Partial<Record<keyof AccountingFormData, string>> = {
   mainService: 'O serviço pelo qual seu escritório quer ser conhecido',
   businessColors: 'Usaremos para personalizar o design da sua página',
   whatsappNumber: 'Incluiremos botões de WhatsApp na página',
+  domainOption1: 'Sua primeira opção de domínio .com.br',
+  domainOption2: 'Caso a primeira não esteja disponível',
   acctMainService: 'Escolha o serviço foco da sua campanha de captação',
   acctServiceArea: 'Você atende apenas sua cidade ou todo Brasil?',
   acctMonthlyClients: 'Nos ajuda a definir a intensidade da estratégia',
@@ -142,25 +146,33 @@ export function AccountingFormStepContent({ step, formData, updateField }: Accou
     const placeholder = fieldPlaceholders[field] || '';
     const description = fieldDescriptions[field];
 
-    // Plan selector
-    if (field === 'chosenPlan') {
+    // Accounting hosting mode selector
+    if (field === 'acctHostingMode') {
       return (
         <div key={field} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
-          <PlanSelector
-            selectedPlan={formData.chosenPlan}
-            onSelectPlan={(plan) => updateField('chosenPlan', plan)}
+          <AccountingHostingSelector
+            selectedMode={formData.acctHostingMode}
+            onSelectMode={(mode) => updateField('acctHostingMode', mode)}
           />
         </div>
       );
     }
 
-    // Hosting
-    if (field === 'hostingOption') {
+    // Domain options
+    if (field === 'domainOption1' || field === 'domainOption2') {
       return (
-        <div key={field} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
-          <HostingSelector
-            selectedOption={formData.hostingOption}
-            onSelectOption={(option) => updateField('hostingOption', option)}
+        <div key={field} className="space-y-2 animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <Label htmlFor={field} className="text-base font-medium flex items-center gap-2">
+            <Globe className="w-4 h-4 text-primary" />
+            {label}
+          </Label>
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          <Input
+            id={field}
+            value={(formData[field] as string) || ''}
+            onChange={(e) => updateField(field, e.target.value as any)}
+            placeholder={placeholder}
+            className="form-input-animated form-input-tall"
           />
         </div>
       );

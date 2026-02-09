@@ -1,5 +1,7 @@
 export type BusinessType = 'professional' | 'accounting';
 
+export type AcctHostingMode = 'full_config' | 'tech_responsible' | null;
+
 export interface AccountingFormData {
   // Basic info (shared)
   businessName: string;
@@ -10,6 +12,9 @@ export interface AccountingFormData {
   logoUrl: string | null;
   chosenPlan: 'presenca' | 'conversao' | 'autoridade';
   hostingOption: 'with' | 'without' | null;
+  domainOption1: string;
+  domainOption2: string;
+  acctHostingMode: AcctHostingMode;
   domainRegistration: import('./form').DomainRegistrationData | null;
 
   // 1. Posicionamento e Foco de Captação
@@ -47,6 +52,9 @@ export const initialAccountingFormData: AccountingFormData = {
   logoUrl: null,
   chosenPlan: 'presenca',
   hostingOption: null,
+  domainOption1: '',
+  domainOption2: '',
+  acctHostingMode: null,
   domainRegistration: null,
   acctMainService: '',
   acctServiceArea: '',
@@ -93,23 +101,17 @@ export const accountingFormSteps: AccountingFormStep[] = [
     fields: ['whatsappNumber', 'socialNetworks'],
   },
   {
-    id: 'acct-plan',
-    title: 'Escolha seu Plano',
-    description: 'Qual nível de página você precisa?',
-    fields: ['chosenPlan'],
-  },
-  {
     id: 'acct-hosting',
-    title: 'Hospedagem e Domínio',
-    description: 'Escolha como deseja hospedar sua página',
-    fields: ['hostingOption'],
+    title: 'Domínio e Configuração',
+    description: 'Escolha suas opções de domínio e configuração',
+    fields: ['domainOption1', 'domainOption2', 'acctHostingMode'],
   },
   {
     id: 'acct-domainRegistration',
     title: 'Dados para Registro do Domínio',
     description: 'Informações necessárias para registrar seu domínio .com.br',
     fields: ['domainRegistration'],
-    condition: (formData) => formData.hostingOption === 'with',
+    condition: (formData) => formData.acctHostingMode === 'full_config',
   },
   {
     id: 'acct-positioning',
