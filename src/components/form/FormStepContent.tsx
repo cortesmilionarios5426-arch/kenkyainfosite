@@ -9,7 +9,7 @@ import { ColorSelector } from './ColorSelector';
 import { GalleryUpload } from './GalleryUpload';
 import { HostingSelector } from './HostingSelector';
 import { DomainRegistrationForm } from './DomainRegistrationForm';
-import { Image, X } from 'lucide-react';
+import { Image, X, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +30,8 @@ const fieldLabels: Record<keyof FormData, string> = {
   logoUrl: 'Logo da sua marca',
   chosenPlan: 'Plano escolhido',
   hostingOption: 'Opção de hospedagem',
+  domainOption1: '1ª opção de domínio',
+  domainOption2: '2ª opção de domínio',
   domainRegistration: 'Dados para registro',
   professionalSummary: 'Resumo profissional',
   services: 'Seus serviços',
@@ -56,6 +58,8 @@ const fieldPlaceholders: Record<keyof FormData, string> = {
   logoUrl: '',
   chosenPlan: '',
   hostingOption: '',
+  domainOption1: 'EXEMPLO: seusite.com.br',
+  domainOption2: 'EXEMPLO: seusite2.com.br',
   domainRegistration: '',
   professionalSummary: 'EXEMPLO: Sou especialista em X há Y anos. Minha missão é ajudar empresas a...',
   services: `EXEMPLO:
@@ -95,6 +99,8 @@ const fieldDescriptions: Record<string, string> = {
   mainService: 'O serviço pelo qual você quer ser conhecido',
   businessColors: 'Usaremos para personalizar o design da sua página',
   whatsappNumber: 'Incluiremos botões de WhatsApp na página',
+  domainOption1: 'Sua primeira opção de domínio .com.br',
+  domainOption2: 'Caso a primeira não esteja disponível',
   professionalSummary: 'Uma breve apresentação sobre você e seu trabalho',
   services: 'Liste seus serviços com preços (se quiser divulgar)',
   locationHours: 'Onde e quando você atende',
@@ -229,7 +235,26 @@ export function FormStepContent({ step, formData, updateField }: FormStepContent
       );
     }
 
-    // Special case: Domain registration
+    // Domain options
+    if (field === 'domainOption1' || field === 'domainOption2') {
+      return (
+        <div key={field} className="space-y-2 animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <Label htmlFor={field} className="text-base font-medium flex items-center gap-2">
+            <Globe className="w-4 h-4 text-primary" />
+            {label}
+          </Label>
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          <Input
+            id={field}
+            value={formData[field] as string}
+            onChange={(e) => updateField(field, e.target.value as FormData[typeof field])}
+            placeholder={placeholder}
+            className="form-input-animated form-input-tall"
+          />
+        </div>
+      );
+    }
+
     if (field === 'domainRegistration') {
       return (
         <div key={field} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>

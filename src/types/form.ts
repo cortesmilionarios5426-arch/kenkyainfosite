@@ -33,6 +33,8 @@ export interface FormData {
   
   // Hosting option
   hostingOption: HostingOption;
+  domainOption1: string;
+  domainOption2: string;
   domainRegistration: DomainRegistrationData | null;
   
   // Presença fields
@@ -79,6 +81,8 @@ export const initialFormData: FormData = {
   logoUrl: null,
   chosenPlan: 'presenca',
   hostingOption: null,
+  domainOption1: '',
+  domainOption2: '',
   domainRegistration: null,
   professionalSummary: '',
   services: '',
@@ -133,7 +137,7 @@ export const formSteps: FormStep[] = [
     id: 'hosting',
     title: 'Hospedagem e Domínio',
     description: 'Escolha como deseja hospedar sua página',
-    fields: ['hostingOption'],
+    fields: ['hostingOption', 'domainOption1', 'domainOption2'],
   },
   {
     id: 'domainRegistration',

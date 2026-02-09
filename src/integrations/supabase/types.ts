@@ -23,6 +23,7 @@ export type Database = {
           acct_companies_served: string | null
           acct_differentials: string | null
           acct_has_script: string | null
+          acct_hosting_mode: string | null
           acct_ideal_client: string | null
           acct_main_objection: string | null
           acct_main_service: string | null
@@ -39,6 +40,8 @@ export type Database = {
           competitive_differentials: string | null
           conversion_gallery: string | null
           created_at: string
+          domain_option_1: string | null
+          domain_option_2: string | null
           domain_registration: Json | null
           faq: string | null
           hosting_option: string | null
@@ -67,6 +70,7 @@ export type Database = {
           acct_companies_served?: string | null
           acct_differentials?: string | null
           acct_has_script?: string | null
+          acct_hosting_mode?: string | null
           acct_ideal_client?: string | null
           acct_main_objection?: string | null
           acct_main_service?: string | null
@@ -83,6 +87,8 @@ export type Database = {
           competitive_differentials?: string | null
           conversion_gallery?: string | null
           created_at?: string
+          domain_option_1?: string | null
+          domain_option_2?: string | null
           domain_registration?: Json | null
           faq?: string | null
           hosting_option?: string | null
@@ -111,6 +117,7 @@ export type Database = {
           acct_companies_served?: string | null
           acct_differentials?: string | null
           acct_has_script?: string | null
+          acct_hosting_mode?: string | null
           acct_ideal_client?: string | null
           acct_main_objection?: string | null
           acct_main_service?: string | null
@@ -127,6 +134,8 @@ export type Database = {
           competitive_differentials?: string | null
           conversion_gallery?: string | null
           created_at?: string
+          domain_option_1?: string | null
+          domain_option_2?: string | null
           domain_registration?: Json | null
           faq?: string | null
           hosting_option?: string | null

@@ -37,7 +37,7 @@ export function MultiStepForm() {
       if (step.condition && !step.condition(acctFormData)) return false;
       return true;
     });
-  }, [acctFormData.hostingOption]);
+  }, [acctFormData.acctHostingMode]);
 
   const isAccounting = businessType === 'accounting';
   const visibleSteps = isAccounting ? visibleAccountingSteps : visibleProfessionalSteps;
@@ -85,9 +85,12 @@ export function MultiStepForm() {
           whatsapp_number: acctFormData.whatsappNumber,
           social_networks: acctFormData.socialNetworks as any,
           logo_url: acctFormData.logoUrl,
-          chosen_plan: acctFormData.chosenPlan,
-          hosting_option: acctFormData.hostingOption,
+          chosen_plan: 'presenca' as const,
+          hosting_option: acctFormData.acctHostingMode,
+          domain_option_1: acctFormData.domainOption1,
+          domain_option_2: acctFormData.domainOption2,
           domain_registration: acctFormData.domainRegistration as any,
+          acct_hosting_mode: acctFormData.acctHostingMode,
           acct_main_service: acctFormData.acctMainService,
           acct_service_area: acctFormData.acctServiceArea,
           acct_monthly_clients: acctFormData.acctMonthlyClients,
@@ -116,6 +119,8 @@ export function MultiStepForm() {
           logo_url: formData.logoUrl,
           chosen_plan: formData.chosenPlan,
           hosting_option: formData.hostingOption,
+          domain_option_1: formData.domainOption1,
+          domain_option_2: formData.domainOption2,
           domain_registration: formData.domainRegistration as any,
           professional_summary: formData.professionalSummary,
           services: formData.services,
